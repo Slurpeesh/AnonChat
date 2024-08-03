@@ -20,7 +20,9 @@ export function buildPlugins({
       template: paths.html,
       favicon: path.resolve(paths.public, 'favicon.png'),
     }),
-    new Dotenv(),
+    new Dotenv({
+      systemvars: true,
+    }),
   ]
 
   if (isDev) {
