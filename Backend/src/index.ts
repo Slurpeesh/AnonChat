@@ -17,6 +17,7 @@ const io = new Server<
       'http://localhost:3000',
       'https://anon-chat-slurpeesh.vercel.app/',
     ],
+    credentials: true,
   },
 })
 
