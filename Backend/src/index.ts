@@ -13,7 +13,10 @@ const io = new Server<
   SocketData
 >({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'https://anon-chat-slurpeesh.vercel.app/',
+    ],
   },
 })
 
