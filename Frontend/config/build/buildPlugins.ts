@@ -1,4 +1,5 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
+import Dotenv from 'dotenv-webpack'
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
@@ -19,6 +20,7 @@ export function buildPlugins({
       template: paths.html,
       favicon: path.resolve(paths.public, 'favicon.png'),
     }),
+    new Dotenv(),
   ]
 
   if (isDev) {
