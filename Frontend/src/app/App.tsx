@@ -2,9 +2,9 @@ import { socket } from '@/app/socket'
 import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
 import Main from '@/pages/Main/Main'
-import { Messages } from '@/widgets/Messages'
+import Messages from '@/widgets/Messages/Messages'
 import { MyForm } from '@/widgets/MyForm'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppDispatch } from './hooks/useActions'
 import { setConnected } from './store/slices/isConnectedSlice'
 import { setWaiting } from './store/slices/isWaitingSlice'
@@ -12,6 +12,7 @@ import { addMessage, deleteMessages } from './store/slices/messagesSlice'
 
 export default function App() {
   const dispatch = useAppDispatch()
+  const scrollableMessages = useRef(null)
 
   useEffect(() => {
     function onConnect() {
@@ -63,8 +64,8 @@ export default function App() {
     <div className="bg-slate-400 h-dvh w-dvw flex flex-col">
       <Header />
       <Main className="bg-slate-200 flex-grow justify-between items-center p-5">
-        <Messages />
-        <MyForm />
+        <Messages ref={scrollableMessages} />
+        <MyForm scrollableMessages={scrollableMessages} />
       </Main>
       <Footer />
     </div>

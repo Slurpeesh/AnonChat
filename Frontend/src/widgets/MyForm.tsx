@@ -1,8 +1,19 @@
+import { useAppSelector } from '@/app/hooks/useActions'
 import { socket } from '@/app/socket'
-import { FormEvent, useState } from 'react'
+import { FormEvent, MutableRefObject, useEffect, useState } from 'react'
 
-export function MyForm() {
+interface IMyForm {
+  scrollableMessages: MutableRefObject<any>
+}
+
+export function MyForm({ scrollableMessages }: IMyForm) {
   const [value, setValue] = useState('')
+  const messages = useAppSelector((state) => state.messages.value)
+
+  useEffect(() => {
+    scrollableMessages.current.scrollTop =
+      scrollableMessages.current.scrollHeight
+  }, [messages])
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
