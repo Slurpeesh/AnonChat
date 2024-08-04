@@ -18,8 +18,9 @@ export function MyForm({ scrollableMessages }: IMyForm) {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setValue('')
-
-    socket.emit('createMessage', value)
+    if (value.trim()) {
+      socket.emit('createMessage', value)
+    }
   }
 
   return (

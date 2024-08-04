@@ -7,7 +7,7 @@ export function buildLoaders({ mode }: BuildOptions): ModuleOptions['rules'] {
   const isDev = mode === 'development'
 
   const assetLoader = {
-    test: /\.(png|jpg|jpeg|gif|woff2)$/i,
+    test: /\.(png|jpg|jpeg|gif|woff2|mp3)$/i,
     type: 'asset/resource',
   }
 

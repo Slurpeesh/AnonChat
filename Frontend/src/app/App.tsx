@@ -1,18 +1,27 @@
 import { socket } from '@/app/socket'
+import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
 import Main from '@/pages/Main/Main'
 import Messages from '@/widgets/Messages/Messages'
 import { MyForm } from '@/widgets/MyForm'
+import aud from '@public/sounds/alert.mp3'
 import { useEffect, useRef } from 'react'
-import { useAppDispatch } from './hooks/useActions'
+import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { setConnected } from './store/slices/isConnectedSlice'
 import { setWaiting } from './store/slices/isWaitingSlice'
-import { addMessage, deleteMessages } from './store/slices/messagesSlice'
+import {
+  addMessage,
+  deleteMessages,
+  setAlerted,
+} from './store/slices/messagesSlice'
 
 export default function App() {
+  const isConnected = useAppSelector((state) => state.isConnected.value)
+  const isWaiting = useAppSelector((state) => state.isWaiting.value)
   const dispatch = useAppDispatch()
   const scrollableMessages = useRef(null)
+  const alertSound = new Audio(aud)
 
   useEffect(() => {
     function onConnect() {
@@ -35,13 +44,43 @@ export default function App() {
       dispatch(setWaiting(false))
     }
 
+    let changer: NodeJS.Timeout = null
+
     function onMessage(value: string, id: string) {
       if (socket.id === id) {
-        dispatch(addMessage({ value, me: true }))
+        dispatch(addMessage({ value, me: true, alerted: !document.hidden }))
       } else {
-        dispatch(addMessage({ value, me: false }))
+        dispatch(addMessage({ value, me: false, alerted: !document.hidden }))
+      }
+
+      if (document.hidden && changer === null) {
+        changer = setInterval(() => {
+          if (document.title === 'AnonChat') {
+            document.title = 'New messages'
+          } else {
+            document.title = 'AnonChat'
+          }
+        }, 1000)
+      }
+      if (document.hidden) {
+        alertSound.pause()
+        alertSound.currentTime = 0
+        alertSound.play().catch((reason) => {
+          console.error(reason)
+        })
       }
     }
+
+    function onTabVisibility() {
+      if (!document.hidden) {
+        clearInterval(changer)
+        changer = null
+        dispatch(setAlerted())
+        document.title = 'AnonChat'
+      }
+    }
+
+    document.addEventListener('visibilitychange', onTabVisibility)
 
     socket.on('connect', onConnect)
     socket.on('disconnect', onDisconnect)
@@ -52,6 +91,7 @@ export default function App() {
     socket.connect()
 
     return () => {
+      document.removeEventListener('visibilitychange', onTabVisibility)
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)
       socket.off('waitingStatus', onWaitingStatus)
@@ -68,6 +108,8 @@ export default function App() {
         <MyForm scrollableMessages={scrollableMessages} />
       </Main>
       <Footer />
+      {!isConnected && <Loader text="Connecting..." />}
+      {isWaiting && <Loader text="Waiting for chat buddy..." />}
     </div>
   )
 }

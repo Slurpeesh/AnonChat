@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 interface IMessage {
   value: string
   me: boolean
+  alerted: boolean
 }
 
 export interface IMessagesSlice {
@@ -24,9 +25,14 @@ export const messagesSlice = createSlice({
     deleteMessages: (state) => {
       state.value = []
     },
+    setAlerted: (state) => {
+      state.value.forEach((message) => {
+        message.alerted = true
+      })
+    },
   },
 })
 
-export const { addMessage, deleteMessages } = messagesSlice.actions
+export const { addMessage, deleteMessages, setAlerted } = messagesSlice.actions
 export const selectMessages = (state: RootState) => state.messages.value
 export default messagesSlice.reducer
