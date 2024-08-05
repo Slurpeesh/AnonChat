@@ -1,6 +1,7 @@
 import isConnectedReducer from '@/app/store/slices/isConnectedSlice'
 import isWaitingReducer from '@/app/store/slices/isWaitingSlice'
 import messagesReducer from '@/app/store/slices/messagesSlice'
+import themeReducer from '@/app/store/slices/themeSlice'
 import { configureStore } from '@reduxjs/toolkit'
 
 export const store = configureStore({
@@ -8,6 +9,7 @@ export const store = configureStore({
     isConnected: isConnectedReducer,
     messages: messagesReducer,
     isWaiting: isWaitingReducer,
+    theme: themeReducer,
   },
 })
 

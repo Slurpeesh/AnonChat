@@ -26,13 +26,14 @@ export function MyForm({ scrollableMessages }: IMyForm) {
   return (
     <form className="flex justify-center gap-5 w-full" onSubmit={onSubmit}>
       <input
-        className="rounded-lg px-1 w-96"
+        className="rounded-lg px-1 w-96 bg-background-section"
         value={value}
+        placeholder="Write a message"
         onChange={(e) => setValue(e.target.value)}
       />
 
       <button
-        className="p-2 bg-green-200 hover:bg-green-300 rounded-md"
+        className="p-2 bg-accent hover:bg-accent-hover rounded-md transition-colors"
         type="submit"
       >
         Submit

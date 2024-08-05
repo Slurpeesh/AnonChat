@@ -11,7 +11,7 @@ const Messages = forwardRef(function Messages(
   const messages = useAppSelector((state) => state.messages.value)
 
   return (
-    <ScrollArea ref={ref} className="w-2/3 h-[28rem] rounded-md border p-4">
+    <ScrollArea ref={ref} className="w-2/3 h-[28rem] rounded-md p-4">
       <ul className="">
         {messages.map((message, index, arr) => {
           const isLastMessage = index === arr.length - 1
@@ -20,8 +20,8 @@ const Messages = forwardRef(function Messages(
             'p-2 my-2 rounded-lg w-2/3 break-words transition-colors delay-300 duration-[4000ms]',
             {
               'ml-auto': message.me,
-              'bg-amber-300': !message.alerted,
-              'bg-white': message.alerted,
+              'bg-alert': !message.alerted,
+              'bg-background-section': message.alerted,
             }
           )
 

@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-background: 0 0% 90%;
+    --color-foreground: 0 0% 10%;
+    --color-background-section: 0 0% 100%;
+    --color-accent-mild: 142 71% 85%;
+    --color-accent: 142 71% 45%;
+    --color-accent-hover: 142 71% 55%;
+    --color-muted: 0 0% 50%;
+    --color-alert: 47 90% 64%;
+  }
+
+  .dark {
+    --color-background: 0 0% 0%;
+    --color-foreground: 0 0% 90%;
+    --color-background-section: 0 0% 15%;
+    --color-accent-mild: 142 71% 15%;
+    --color-accent: 142 71% 45%;
+    --color-accent-hover: 142 71% 35%;
+    --color-muted: 0 0% 50%;
+    --color-alert: 47 90% 34%;
+  }
+}

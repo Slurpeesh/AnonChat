@@ -26,17 +26,16 @@ export default function App() {
   useEffect(() => {
     function onConnect() {
       dispatch(setConnected(true))
-      dispatch(deleteMessages())
       dispatch(setWaiting(true))
     }
 
     function onDisconnect() {
       dispatch(setWaiting(false))
       dispatch(setConnected(false))
-      socket.connect()
     }
 
     function onWaitingStatus() {
+      dispatch(deleteMessages())
       dispatch(setWaiting(true))
     }
 
@@ -101,9 +100,9 @@ export default function App() {
   }, [])
 
   return (
-    <div className="bg-slate-400 h-dvh w-dvw flex flex-col">
+    <div className="bg-background text-foreground h-dvh w-dvw flex flex-col">
       <Header />
-      <Main className="bg-slate-200 flex-grow justify-between items-center p-5">
+      <Main className="flex-grow justify-between items-center p-5">
         <Messages ref={scrollableMessages} />
         <MyForm scrollableMessages={scrollableMessages} />
       </Main>

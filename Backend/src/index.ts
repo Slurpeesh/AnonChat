@@ -20,7 +20,14 @@ const io = new Server<
 let waitingId: string | null = null
 let waitingSocket: Socket | null = null
 
-io.on('connection', (socket) => {
+function joinQueue(
+  socket: Socket<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >
+) {
   if (waitingId === null) {
     const id = Date.now().toString()
     waitingId = id
@@ -36,6 +43,10 @@ io.on('connection', (socket) => {
     waitingSocket = null
     waitingId = null
   }
+}
+
+io.on('connection', (socket) => {
+  joinQueue(socket)
   socket.on('disconnecting', () => {
     if (socket.data.room === waitingId) {
       waitingId = null
@@ -47,7 +58,11 @@ io.on('connection', (socket) => {
     const rooms = io.of('/').adapter.rooms
     const socketIds = rooms.get(roomId)
     socketIds?.forEach((socketId) => {
-      io.sockets.sockets.get(socketId)?.disconnect()
+      const curSocket = io.sockets.sockets.get(socketId)
+      if (curSocket !== undefined) {
+        curSocket.leave(curSocket.data.room)
+        joinQueue(curSocket)
+      }
     })
   })
   socket.on('createMessage', (msg: string) => {
