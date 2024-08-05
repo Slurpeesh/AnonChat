@@ -40,6 +40,7 @@ export default function App() {
     }
 
     function onReadyStatus() {
+      dispatch(deleteMessages())
       dispatch(setWaiting(false))
     }
 
