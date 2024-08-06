@@ -66,7 +66,6 @@ const Messages = forwardRef(function Messages(
 
   function onPointerDownMessageHandler(e: PointerEvent<HTMLLIElement>) {
     const messageElement = e.currentTarget as HTMLElement
-    console.log(messageElement)
     const checkLiElem = messageElement.getAttribute('data-me') === 'true'
     if (checkLiElem !== null) {
       pointedDownMessage.current = messageElement
@@ -102,7 +101,7 @@ const Messages = forwardRef(function Messages(
     <ScrollArea
       ref={ref}
       className={cn(
-        'w-full md:w-2/3 max-h-[26rem] md:max-h-[24rem] rounded-md p-4',
+        'w-full md:w-2/3 max-h-[26rem] md:max-h-[24rem] rounded-md px-4',
         className
       )}
     >
@@ -111,19 +110,20 @@ const Messages = forwardRef(function Messages(
           const isLastMessage = index === arr.length - 1
           const isReplyed = Object.keys(message.reply).length !== 0
           const animation = message.me ? { x: [50, 0] } : { x: [-50, 0] }
-          const commonClasses = cn(
+          const messageClassName = cn(
             'p-2 my-2 rounded-lg w-2/3 break-all transition-colors delay-300 duration-[3000ms]',
             {
-              'ml-auto': message.me,
+              'order-first': !message.me,
               'bg-alert': !message.alerted,
               'bg-background': message.alerted,
             }
           )
 
           return (
-            <div key={index}>
+            <div className="flex justify-between items-center" key={index}>
+              <Reply className={cn({ '-scale-x-100': !message.me })} />
               <ContextMenu>
-                <ContextMenuTrigger>
+                <ContextMenuTrigger asChild>
                   <motion.li
                     drag="x"
                     dragSnapToOrigin
@@ -138,7 +138,7 @@ const Messages = forwardRef(function Messages(
                     data-message-id={index}
                     data-me={message.me}
                     animate={isLastMessage ? animation : {}}
-                    className={commonClasses}
+                    className={messageClassName}
                   >
                     {isReplyed && (
                       <button
