@@ -4,7 +4,7 @@ import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Reply, X } from 'lucide-react'
-import { FormEvent, MutableRefObject, useEffect, useState } from 'react'
+import { FormEvent, MutableRefObject, useEffect, useRef, useState } from 'react'
 
 interface IMyForm {
   scrollableMessages: MutableRefObject<any>
@@ -16,10 +16,32 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
   const messages = useAppSelector((state) => state.messages.value)
   const reply = useAppSelector((state) => state.reply.value)
   const dispatch = useAppDispatch()
+  const previousMessageCount = useRef(messages.length)
 
   useEffect(() => {
-    scrollableMessages.current.scrollTop =
-      scrollableMessages.current.scrollHeight
+    let isLastMessageRepliedByMe: boolean = false
+    if (messages.length !== 0) {
+      const lastMessage = messages[messages.length - 1]
+      const isReplied = lastMessage.reply !== undefined
+      if (isReplied) {
+        isLastMessageRepliedByMe =
+          Object.keys(lastMessage.reply).length !== 0 && lastMessage.me
+      }
+    }
+    const isAtBottom =
+      Math.abs(
+        scrollableMessages.current.scrollHeight -
+          scrollableMessages.current.scrollTop -
+          scrollableMessages.current.clientHeight
+      ) < 100
+    if (
+      (previousMessageCount.current < messages.length && isAtBottom) ||
+      isLastMessageRepliedByMe
+    ) {
+      scrollableMessages.current.scrollTop =
+        scrollableMessages.current.scrollHeight
+    }
+    previousMessageCount.current = messages.length
   }, [messages])
 
   function onSubmit(e: FormEvent) {
@@ -27,7 +49,9 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
     setValue('')
     if (value.trim()) {
       socket.emit('createMessage', value, reply)
-      dispatch(setReply({}))
+      setTimeout(() => {
+        dispatch(setReply({}))
+      })
     }
   }
 
@@ -54,9 +78,9 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
           >
             <div className="flex justify-center items-center gap-2">
               <Reply />
-              <p className="break-words">
+              <p className="break-all">
                 <span className="font-semibold">{reply.author}: </span>
-                {reply.value.length > 50
+                {reply.value.length > 70
                   ? reply.value.slice(0, 70) + '...'
                   : reply.value}
               </p>

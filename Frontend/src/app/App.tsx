@@ -13,7 +13,7 @@ import { setWaiting } from './store/slices/isWaitingSlice'
 import {
   addMessage,
   deleteMessages,
-  setAlerted,
+  setAllAlerted,
 } from './store/slices/messagesSlice'
 import { IReply } from './store/slices/types/types'
 
@@ -52,6 +52,8 @@ export default function App() {
         dispatch(
           addMessage({ value, me: true, alerted: !document.hidden, reply })
         )
+        scrollableMessages.current.scrollTop =
+          scrollableMessages.current.scrollHeight
       } else {
         if (Object.keys(reply).length !== 0) {
           reply.author = reply.author === 'Me' ? 'Stranger' : 'Me'
@@ -70,7 +72,13 @@ export default function App() {
           }
         }, 1000)
       }
-      if (document.hidden) {
+      const isAtBottom =
+        Math.abs(
+          scrollableMessages.current.scrollHeight -
+            scrollableMessages.current.scrollTop -
+            scrollableMessages.current.clientHeight
+        ) < 100
+      if (document.hidden || !isAtBottom) {
         alertSound.pause()
         alertSound.currentTime = 0
         alertSound.play().catch((reason) => {
@@ -83,7 +91,7 @@ export default function App() {
       if (!document.hidden) {
         clearInterval(changer)
         changer = null
-        dispatch(setAlerted())
+        dispatch(setAllAlerted())
         document.title = 'AnonChat'
       }
     }
