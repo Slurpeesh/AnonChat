@@ -65,8 +65,8 @@ io.on('connection', (socket) => {
       }
     })
   })
-  socket.on('createMessage', (msg: string) => {
-    io.to(socket.data.room).emit('message', msg, socket.id)
+  socket.on('createMessage', (msg: string, reply) => {
+    io.to(socket.data.room).emit('message', msg, socket.id, reply)
   })
 })
 

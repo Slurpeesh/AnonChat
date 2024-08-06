@@ -15,6 +15,7 @@ import {
   deleteMessages,
   setAlerted,
 } from './store/slices/messagesSlice'
+import { IReply } from './store/slices/types/types'
 
 export default function App() {
   const isConnected = useAppSelector((state) => state.isConnected.value)
@@ -46,11 +47,18 @@ export default function App() {
 
     let changer: NodeJS.Timeout = null
 
-    function onMessage(value: string, id: string) {
+    function onMessage(value: string, id: string, reply: IReply) {
       if (socket.id === id) {
-        dispatch(addMessage({ value, me: true, alerted: !document.hidden }))
+        dispatch(
+          addMessage({ value, me: true, alerted: !document.hidden, reply })
+        )
       } else {
-        dispatch(addMessage({ value, me: false, alerted: !document.hidden }))
+        if (Object.keys(reply).length !== 0) {
+          reply.author = reply.author === 'Me' ? 'Stranger' : 'Me'
+        }
+        dispatch(
+          addMessage({ value, me: false, alerted: !document.hidden, reply })
+        )
       }
 
       if (document.hidden && changer === null) {
@@ -101,11 +109,11 @@ export default function App() {
   }, [])
 
   return (
-    <div className="bg-background text-foreground h-dvh w-dvw flex flex-col">
+    <div className="text-foreground h-dvh w-dvw flex flex-col">
       <Header />
-      <Main className="flex-grow justify-between items-center p-5">
-        <Messages ref={scrollableMessages} />
-        <MyForm scrollableMessages={scrollableMessages} />
+      <Main className="bg-background flex flex-col flex-grow justify-between items-center p-5">
+        <Messages ref={scrollableMessages} className="" />
+        <MyForm scrollableMessages={scrollableMessages} className="" />
       </Main>
       <Footer />
       {!isConnected && <Loader text="Connecting..." />}

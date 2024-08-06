@@ -1,10 +1,12 @@
 import { RootState } from '@/app/store'
+import { IReply } from '@/app/store/slices/types/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface IMessage {
   value: string
   me: boolean
   alerted: boolean
+  reply?: IReply
 }
 
 export interface IMessagesSlice {

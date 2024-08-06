@@ -12,6 +12,7 @@
     --color-accent-hover: 142 71% 55%;
     --color-muted: 0 0% 50%;
     --color-alert: 47 90% 64%;
+    --color-danger: 0 72% 51%;
   }
 
   .dark {
@@ -23,5 +24,6 @@
     --color-accent-hover: 142 71% 35%;
     --color-muted: 0 0% 50%;
     --color-alert: 47 90% 34%;
+    --color-danger: 0 72% 51%;
   }
 }
