@@ -53,8 +53,6 @@ const MyForm = forwardRef(function MyForm(
   }
 
   useEffect(() => {
-    console.log(ref.current)
-    console.log(reply)
     setTimeout(() => {
       ref.current.focus()
     })

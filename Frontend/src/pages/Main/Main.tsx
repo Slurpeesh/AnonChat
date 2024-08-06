@@ -1,5 +1,5 @@
 import { cn } from '@/app/lib/utils'
-import bgMain from '@/pages/Main/assets/1.png'
+import bgMain from '@/pages/Main/assets/bgMain.png'
 import { HTMLAttributes, ReactNode } from 'react'
 interface IMain extends HTMLAttributes<HTMLElement> {
   children?: ReactNode

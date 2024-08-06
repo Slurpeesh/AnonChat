@@ -9,9 +9,16 @@ import {
   ContextMenuTrigger,
 } from '@/shared/ContextMenu/ContextMenu'
 import { ScrollArea } from '@/shared/ScrollArea/ScrollArea'
-import { motion } from 'framer-motion'
+import { motion, PanInfo } from 'framer-motion'
 import { Copy, Reply } from 'lucide-react'
-import { forwardRef, LegacyRef, MouseEvent } from 'react'
+import {
+  forwardRef,
+  LegacyRef,
+  MouseEvent,
+  MutableRefObject,
+  PointerEvent,
+  useRef,
+} from 'react'
 
 interface IMessages {
   className?: string
@@ -23,6 +30,7 @@ const Messages = forwardRef(function Messages(
 ) {
   const messages = useAppSelector((state) => state.messages.value)
   const dispatch = useAppDispatch()
+  const pointedDownMessage: MutableRefObject<HTMLElement> = useRef(null)
 
   function replySelectHandler(e: Event) {
     const customEvent = e as CustomEvent
@@ -32,7 +40,6 @@ const Messages = forwardRef(function Messages(
     const author = dataMe ? 'Me' : 'Stranger'
     const value = messages[dataKey].value
     dispatch(setReply({ author, value, id: dataKey }))
-    console.log('Updated Reply')
   }
 
   function copySelectHandler(e: Event) {
@@ -57,6 +64,40 @@ const Messages = forwardRef(function Messages(
     }, 3000)
   }
 
+  function onPointerDownMessageHandler(e: PointerEvent<HTMLLIElement>) {
+    const messageElement = e.currentTarget as HTMLElement
+    console.log(messageElement)
+    const checkLiElem = messageElement.getAttribute('data-me') === 'true'
+    if (checkLiElem !== null) {
+      pointedDownMessage.current = messageElement
+    }
+  }
+
+  function onDragEndHandler(
+    e: globalThis.MouseEvent | globalThis.PointerEvent | TouchEvent,
+    info: PanInfo
+  ) {
+    const messageElement = pointedDownMessage.current
+    if (messageElement === null) return
+    const dataMe = messageElement.getAttribute('data-me') === 'true'
+    if (dataMe) {
+      if (info.offset.x < -200) {
+        const dataKey = Number(messageElement.getAttribute('data-message-id'))
+        const author = dataMe ? 'Me' : 'Stranger'
+        const value = messages[dataKey].value
+        dispatch(setReply({ author, value, id: dataKey }))
+      }
+    } else {
+      if (info.offset.x > 200) {
+        const dataKey = Number(messageElement.getAttribute('data-message-id'))
+        const author = dataMe ? 'Me' : 'Stranger'
+        const value = messages[dataKey].value
+        dispatch(setReply({ author, value, id: dataKey }))
+      }
+    }
+    pointedDownMessage.current = null
+  }
+
   return (
     <ScrollArea
       ref={ref}
@@ -65,7 +106,7 @@ const Messages = forwardRef(function Messages(
         className
       )}
     >
-      <ul className="">
+      <ul>
         {messages.map((message, index, arr) => {
           const isLastMessage = index === arr.length - 1
           const isReplyed = Object.keys(message.reply).length !== 0
@@ -84,7 +125,18 @@ const Messages = forwardRef(function Messages(
               <ContextMenu>
                 <ContextMenuTrigger>
                   <motion.li
+                    drag="x"
+                    dragSnapToOrigin
+                    dragConstraints={
+                      message.me
+                        ? { left: -150, right: 0 }
+                        : { left: 0, right: 150 }
+                    }
+                    dragElastic={0.06}
+                    onDragEnd={(e, info) => onDragEndHandler(e, info)}
+                    onPointerDown={(e) => onPointerDownMessageHandler(e)}
                     data-message-id={index}
+                    data-me={message.me}
                     animate={isLastMessage ? animation : {}}
                     className={commonClasses}
                   >
