@@ -32,6 +32,7 @@ const Messages = forwardRef(function Messages(
     const author = dataMe ? 'Me' : 'Stranger'
     const value = messages[dataKey].value
     dispatch(setReply({ author, value, id: dataKey }))
+    console.log('Updated Reply')
   }
 
   function copySelectHandler(e: Event) {
@@ -53,13 +54,16 @@ const Messages = forwardRef(function Messages(
     })
     setTimeout(() => {
       dispatch(setAlerted({ id: dataId, state: true }))
-    }, 4000)
+    }, 3000)
   }
 
   return (
     <ScrollArea
       ref={ref}
-      className={cn('w-2/3 max-h-[24rem] rounded-md p-4', className)}
+      className={cn(
+        'w-full md:w-2/3 max-h-[26rem] md:max-h-[24rem] rounded-md p-4',
+        className
+      )}
     >
       <ul className="">
         {messages.map((message, index, arr) => {
@@ -67,11 +71,11 @@ const Messages = forwardRef(function Messages(
           const isReplyed = Object.keys(message.reply).length !== 0
           const animation = message.me ? { x: [50, 0] } : { x: [-50, 0] }
           const commonClasses = cn(
-            'p-2 my-2 rounded-lg w-2/3 break-all transition-colors delay-300 duration-[4000ms]',
+            'p-2 my-2 rounded-lg w-2/3 break-all transition-colors delay-300 duration-[3000ms]',
             {
               'ml-auto': message.me,
               'bg-alert': !message.alerted,
-              'bg-background-section': message.alerted,
+              'bg-background': message.alerted,
             }
           )
 

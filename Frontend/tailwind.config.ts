@@ -8,8 +8,6 @@ export default {
       colors: {
         background: 'hsl(var(--color-background) / <alpha-value>)',
         foreground: 'hsl(var(--color-foreground) / <alpha-value>)',
-        'background-section':
-          'hsl(var(--color-background-section) / <alpha-value>)',
         'accent-mild': 'hsl(var(--color-accent-mild) / <alpha-value>)',
         accent: 'hsl(var(--color-accent) / <alpha-value>)',
         'accent-hover': 'hsl(var(--color-accent-hover) / <alpha-value>)',

@@ -4,7 +4,7 @@ import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
 import Main from '@/pages/Main/Main'
 import Messages from '@/widgets/Messages/Messages'
-import { MyForm } from '@/widgets/MyForm'
+import MyForm from '@/widgets/MyForm'
 import aud from '@public/sounds/alert.mp3'
 import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from './hooks/useActions'
@@ -15,6 +15,7 @@ import {
   deleteMessages,
   setAllAlerted,
 } from './store/slices/messagesSlice'
+import { setReply } from './store/slices/replySlice'
 import { IReply } from './store/slices/types/types'
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
   const isWaiting = useAppSelector((state) => state.isWaiting.value)
   const dispatch = useAppDispatch()
   const scrollableMessages = useRef(null)
+  const inputRef = useRef(null)
   const alertSound = new Audio(aud)
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function App() {
           addMessage({ value, me: false, alerted: !document.hidden, reply })
         )
       }
+      dispatch(setReply({}))
 
       if (document.hidden && changer === null) {
         changer = setInterval(() => {
@@ -117,11 +120,15 @@ export default function App() {
   }, [])
 
   return (
-    <div className="text-foreground h-dvh w-dvw flex flex-col">
+    <div className="text-foreground h-dvh w-dvw flex flex-col overflow-hidden">
       <Header />
-      <Main className="bg-background flex flex-col flex-grow justify-between items-center p-5">
-        <Messages ref={scrollableMessages} className="" />
-        <MyForm scrollableMessages={scrollableMessages} className="" />
+      <Main className="relative bg-background flex flex-col flex-grow justify-between items-center p-5">
+        <Messages ref={scrollableMessages} className="z-10 relative" />
+        <MyForm
+          ref={inputRef}
+          scrollableMessages={scrollableMessages}
+          className="z-10 relative"
+        />
       </Main>
       <Footer />
       {!isConnected && <Loader text="Connecting..." />}

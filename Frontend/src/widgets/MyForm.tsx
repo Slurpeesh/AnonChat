@@ -3,15 +3,25 @@ import { cn } from '@/app/lib/utils'
 import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Reply, X } from 'lucide-react'
-import { FormEvent, MutableRefObject, useEffect, useRef, useState } from 'react'
+import { Reply, SendHorizonal, X } from 'lucide-react'
+import {
+  FormEvent,
+  forwardRef,
+  MouseEvent,
+  MutableRefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 interface IMyForm {
   scrollableMessages: MutableRefObject<any>
   className?: string
 }
-
-export function MyForm({ scrollableMessages, className }: IMyForm) {
+const MyForm = forwardRef(function MyForm(
+  { scrollableMessages, className }: IMyForm,
+  ref: MutableRefObject<any>
+) {
   const [value, setValue] = useState('')
   const messages = useAppSelector((state) => state.messages.value)
   const reply = useAppSelector((state) => state.reply.value)
@@ -19,25 +29,13 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
   const previousMessageCount = useRef(messages.length)
 
   useEffect(() => {
-    let isLastMessageRepliedByMe: boolean = false
-    if (messages.length !== 0) {
-      const lastMessage = messages[messages.length - 1]
-      const isReplied = lastMessage.reply !== undefined
-      if (isReplied) {
-        isLastMessageRepliedByMe =
-          Object.keys(lastMessage.reply).length !== 0 && lastMessage.me
-      }
-    }
     const isAtBottom =
       Math.abs(
         scrollableMessages.current.scrollHeight -
           scrollableMessages.current.scrollTop -
           scrollableMessages.current.clientHeight
       ) < 100
-    if (
-      (previousMessageCount.current < messages.length && isAtBottom) ||
-      isLastMessageRepliedByMe
-    ) {
+    if (previousMessageCount.current < messages.length && isAtBottom) {
       scrollableMessages.current.scrollTop =
         scrollableMessages.current.scrollHeight
     }
@@ -49,20 +47,28 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
     setValue('')
     if (value.trim()) {
       socket.emit('createMessage', value, reply)
-      setTimeout(() => {
-        dispatch(setReply({}))
-      })
+      scrollableMessages.current.scrollTop =
+        scrollableMessages.current.scrollHeight
     }
   }
 
-  function onCancelReply() {
+  useEffect(() => {
+    console.log(ref.current)
+    console.log(reply)
+    setTimeout(() => {
+      ref.current.focus()
+    })
+  }, [reply])
+
+  function onCancelReply(e: MouseEvent<HTMLButtonElement>) {
+    e.preventDefault()
     dispatch(setReply({}))
   }
 
   return (
     <form
       className={cn(
-        'flex flex-col justify-center items-center gap-2 w-2/5',
+        'flex flex-col justify-center items-center gap-2 w-full sm:w-4/5 lg:w-2/5',
         className
       )}
       onSubmit={onSubmit}
@@ -74,7 +80,7 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ x: 250, opacity: 0 }}
             transition={{ type: 'spring', bounce: 0 }}
-            className="flex justify-between items-center w-full gap-5 bg-muted/20 rounded-lg p-2 text-sm"
+            className="flex justify-between items-center w-full gap-5 bg-background/90 rounded-lg p-2 text-sm"
           >
             <div className="flex justify-center items-center gap-2">
               <Reply />
@@ -87,7 +93,8 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
             </div>
 
             <button
-              onClick={() => onCancelReply()}
+              type="button"
+              onClick={(e) => onCancelReply(e)}
               className="rounded-full hover:bg-muted/20 p-1 transition-colors"
             >
               <X className="stroke-danger" />
@@ -97,7 +104,8 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
       </AnimatePresence>
       <div className="flex justify-between gap-5 w-full">
         <input
-          className="rounded-lg px-1 w-full bg-background-section"
+          ref={ref}
+          className="rounded-lg px-2 w-full bg-background"
           value={value}
           placeholder="Write a message"
           onChange={(e) => setValue(e.target.value)}
@@ -107,9 +115,11 @@ export function MyForm({ scrollableMessages, className }: IMyForm) {
           className="p-2 bg-accent hover:bg-accent-hover rounded-md transition-colors"
           type="submit"
         >
-          Submit
+          <SendHorizonal className="stroke-foreground sm:mx-5" />
         </button>
       </div>
     </form>
   )
-}
+})
+
+export default MyForm
