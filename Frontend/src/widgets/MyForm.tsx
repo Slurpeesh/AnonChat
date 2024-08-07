@@ -25,6 +25,8 @@ const MyForm = forwardRef(function MyForm(
   const [value, setValue] = useState('')
   const messages = useAppSelector((state) => state.messages.value)
   const reply = useAppSelector((state) => state.reply.value)
+  const isConnected = useAppSelector((state) => state.isConnected.value)
+  const isWaiting = useAppSelector((state) => state.isWaiting.value)
   const dispatch = useAppDispatch()
   const previousMessageCount = useRef(messages.length)
 
@@ -78,7 +80,7 @@ const MyForm = forwardRef(function MyForm(
             animate={{ y: 0, opacity: 1 }}
             exit={{ x: 250, opacity: 0 }}
             transition={{ type: 'spring', bounce: 0 }}
-            className="flex justify-between items-center w-full gap-5 bg-background/90 rounded-lg p-2 text-sm"
+            className="flex justify-between items-center w-full gap-5 bg-background-section/90 rounded-lg p-2 text-sm"
           >
             <div className="flex justify-center items-center gap-2">
               <Reply />
@@ -103,10 +105,11 @@ const MyForm = forwardRef(function MyForm(
       <div className="flex justify-between gap-5 w-full">
         <input
           ref={ref}
-          className="rounded-lg px-2 w-full bg-background"
+          className="rounded-lg px-2 w-full bg-background-section"
           value={value}
           placeholder="Write a message"
           onChange={(e) => setValue(e.target.value)}
+          disabled={!isConnected || isWaiting}
         />
 
         <button

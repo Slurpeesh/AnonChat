@@ -108,20 +108,24 @@ const Messages = forwardRef(function Messages(
       <ul>
         {messages.map((message, index, arr) => {
           const isLastMessage = index === arr.length - 1
-          const isReplyed = Object.keys(message.reply).length !== 0
+          const isReplied = Object.keys(message.reply).length !== 0
           const animation = message.me ? { x: [50, 0] } : { x: [-50, 0] }
           const messageClassName = cn(
             'p-2 my-2 rounded-lg w-2/3 break-all transition-colors delay-300 duration-[3000ms]',
             {
               'order-first': !message.me,
               'bg-alert': !message.alerted,
-              'bg-background': message.alerted,
+              'bg-background-section': message.alerted,
             }
           )
 
           return (
             <div className="flex justify-between items-center" key={index}>
-              <Reply className={cn({ '-scale-x-100': !message.me })} />
+              <Reply
+                className={cn('stroke-muted', {
+                  '-scale-x-100': !message.me,
+                })}
+              />
               <ContextMenu>
                 <ContextMenuTrigger asChild>
                   <motion.li
@@ -140,7 +144,7 @@ const Messages = forwardRef(function Messages(
                     animate={isLastMessage ? animation : {}}
                     className={messageClassName}
                   >
-                    {isReplyed && (
+                    {isReplied && (
                       <button
                         onClick={(e) => messageReplyHandler(e)}
                         className="flex flex-col text-accent border-l border-accent pl-2 text-sm w-full"
