@@ -52,7 +52,13 @@ export default function App() {
     function onMessage(value: string, id: string, reply: IReply) {
       if (socket.id === id) {
         dispatch(
-          addMessage({ value, me: true, alerted: !document.hidden, reply })
+          addMessage({
+            value,
+            me: true,
+            alerted: !document.hidden,
+            reply,
+            copied: false,
+          })
         )
         scrollableMessages.current.scrollTop =
           scrollableMessages.current.scrollHeight
@@ -61,7 +67,13 @@ export default function App() {
           reply.author = reply.author === 'Me' ? 'Stranger' : 'Me'
         }
         dispatch(
-          addMessage({ value, me: false, alerted: !document.hidden, reply })
+          addMessage({
+            value,
+            me: false,
+            alerted: !document.hidden,
+            reply,
+            copied: false,
+          })
         )
       }
       dispatch(setReply({}))

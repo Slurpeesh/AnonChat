@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { cn } from '@/app/lib/utils'
-import { setAlerted } from '@/app/store/slices/messagesSlice'
+import { setAlerted, setCopied } from '@/app/store/slices/messagesSlice'
 import { setReply } from '@/app/store/slices/replySlice'
 import {
   ContextMenu,
@@ -10,7 +10,7 @@ import {
 } from '@/shared/ContextMenu/ContextMenu'
 import { ScrollArea } from '@/shared/ScrollArea/ScrollArea'
 import { motion, PanInfo } from 'framer-motion'
-import { Copy, Reply } from 'lucide-react'
+import { Copy, CopyCheck, Reply } from 'lucide-react'
 import {
   forwardRef,
   LegacyRef,
@@ -30,6 +30,8 @@ const Messages = forwardRef(function Messages(
 ) {
   const messages = useAppSelector((state) => state.messages.value)
   const dispatch = useAppDispatch()
+  const copyTimeoutID: MutableRefObject<ReturnType<typeof setTimeout>> =
+    useRef(undefined)
   const pointedDownMessage: MutableRefObject<HTMLElement> = useRef(null)
 
   function replySelectHandler(e: Event) {
@@ -43,10 +45,19 @@ const Messages = forwardRef(function Messages(
   }
 
   function copySelectHandler(e: Event) {
+    e.preventDefault()
     const customEvent = e as CustomEvent
     const target = customEvent.currentTarget as HTMLElement
     const dataKey = Number(target.getAttribute('data-key'))
     navigator.clipboard.writeText(messages[dataKey].value)
+    dispatch(setCopied({ id: dataKey, state: true }))
+    if (copyTimeoutID.current) {
+      clearTimeout(copyTimeoutID.current)
+    }
+    copyTimeoutID.current = setTimeout(
+      () => dispatch(setCopied({ id: dataKey, state: false })),
+      3000
+    )
   }
 
   function messageReplyHandler(e: MouseEvent<HTMLButtonElement>) {
@@ -181,8 +192,17 @@ const Messages = forwardRef(function Messages(
                     className="flex items-center gap-2"
                     onSelect={(e) => copySelectHandler(e)}
                   >
-                    <Copy />
-                    <p>Copy</p>
+                    {message.copied ? (
+                      <>
+                        <CopyCheck />
+                        <p>Copied</p>
+                      </>
+                    ) : (
+                      <>
+                        <Copy />
+                        <p>Copy</p>
+                      </>
+                    )}
                   </ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>

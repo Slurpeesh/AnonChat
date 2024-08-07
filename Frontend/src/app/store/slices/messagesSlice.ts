@@ -2,7 +2,7 @@ import { RootState } from '@/app/store'
 import { IReply } from '@/app/store/slices/types/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-interface IAlertController {
+interface IStateController {
   id: number
   state: boolean
 }
@@ -11,6 +11,7 @@ interface IMessage {
   value: string
   me: boolean
   alerted: boolean
+  copied: boolean
   reply?: IReply
 }
 
@@ -37,13 +38,21 @@ export const messagesSlice = createSlice({
         message.alerted = true
       })
     },
-    setAlerted: (state, payload: PayloadAction<IAlertController>) => {
+    setAlerted: (state, payload: PayloadAction<IStateController>) => {
       state.value[payload.payload.id].alerted = payload.payload.state
+    },
+    setCopied: (state, payload: PayloadAction<IStateController>) => {
+      state.value[payload.payload.id].copied = payload.payload.state
     },
   },
 })
 
-export const { addMessage, deleteMessages, setAllAlerted, setAlerted } =
-  messagesSlice.actions
+export const {
+  addMessage,
+  deleteMessages,
+  setAllAlerted,
+  setAlerted,
+  setCopied,
+} = messagesSlice.actions
 export const selectMessages = (state: RootState) => state.messages.value
 export default messagesSlice.reducer
