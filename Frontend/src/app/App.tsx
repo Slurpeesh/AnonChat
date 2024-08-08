@@ -3,8 +3,8 @@ import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
 import Main from '@/pages/Main/Main'
+import Form from '@/widgets/Form/Form'
 import Messages from '@/widgets/Messages/Messages'
-import MyForm from '@/widgets/MyForm'
 import aud from '@public/sounds/alert.mp3'
 import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from './hooks/useActions'
@@ -136,7 +136,7 @@ export default function App() {
       <Header />
       <Main className="relative bg-background flex flex-col flex-grow justify-between items-center p-5">
         <Messages ref={scrollableMessages} className="z-10 relative" />
-        <MyForm
+        <Form
           ref={inputRef}
           scrollableMessages={scrollableMessages}
           className="z-10 relative"

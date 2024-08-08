@@ -3,7 +3,7 @@ import { cn } from '@/app/lib/utils'
 import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Reply, SendHorizonal, X } from 'lucide-react'
+import { Reply, X } from 'lucide-react'
 import {
   FormEvent,
   forwardRef,
@@ -13,22 +13,32 @@ import {
   useRef,
   useState,
 } from 'react'
+import MotionSendHorizontal from './MotionSendHorizontal'
 
 interface IMyForm {
   scrollableMessages: MutableRefObject<any>
   className?: string
 }
-const MyForm = forwardRef(function MyForm(
+const Form = forwardRef(function Form(
   { scrollableMessages, className }: IMyForm,
   ref: MutableRefObject<any>
 ) {
   const [value, setValue] = useState('')
+  const [isHovered, setIsHovered] = useState(false)
   const messages = useAppSelector((state) => state.messages.value)
   const reply = useAppSelector((state) => state.reply.value)
   const isConnected = useAppSelector((state) => state.isConnected.value)
   const isWaiting = useAppSelector((state) => state.isWaiting.value)
   const dispatch = useAppDispatch()
   const previousMessageCount = useRef(messages.length)
+
+  const sendButtonVariants = {
+    hover: {
+      rotate: [0, 10, -10, 0],
+      scale: 1.1,
+    },
+    initial: { rotate: 0, scale: 1 },
+  }
 
   useEffect(() => {
     const isAtBottom =
@@ -63,6 +73,14 @@ const MyForm = forwardRef(function MyForm(
   function onCancelReply(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
     dispatch(setReply({}))
+  }
+
+  function onMouseEnterSendButton() {
+    setIsHovered(true)
+  }
+
+  function onMouseLeaveSendButton() {
+    setIsHovered(false)
   }
 
   return (
@@ -113,14 +131,21 @@ const MyForm = forwardRef(function MyForm(
         />
 
         <button
-          className="p-2 bg-accent hover:bg-accent-hover rounded-md transition-colors"
+          onMouseEnter={() => onMouseEnterSendButton()}
+          onMouseLeave={() => onMouseLeaveSendButton()}
+          className="p-2 sm:px-6 bg-accent hover:bg-accent-hover rounded-md transition-colors"
           type="submit"
         >
-          <SendHorizonal className="stroke-foreground sm:mx-5" />
+          <MotionSendHorizontal
+            variants={sendButtonVariants}
+            animate={isHovered ? 'hover' : 'initial'}
+            transition={{ duration: 0.25 }}
+            className="stroke-foreground ml-auto"
+          />
         </button>
       </div>
     </form>
   )
 })
 
-export default MyForm
+export default Form
