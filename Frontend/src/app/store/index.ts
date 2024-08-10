@@ -1,4 +1,5 @@
 import isConnectedReducer from '@/app/store/slices/isConnectedSlice'
+import isScrollAtBottomReducer from '@/app/store/slices/isScrollAtBottom'
 import isWaitingReducer from '@/app/store/slices/isWaitingSlice'
 import messagesReducer from '@/app/store/slices/messagesSlice'
 import replyReducer from '@/app/store/slices/replySlice'
@@ -12,6 +13,7 @@ export const store = configureStore({
     isWaiting: isWaitingReducer,
     theme: themeReducer,
     reply: replyReducer,
+    isScrollAtBottom: isScrollAtBottomReducer,
   },
 })
 

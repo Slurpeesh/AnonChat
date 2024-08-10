@@ -1,7 +1,9 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { cn } from '@/app/lib/utils'
+import { setIsScrollAtBottom } from '@/app/store/slices/isScrollAtBottom'
 import { setAlerted, setCopied } from '@/app/store/slices/messagesSlice'
 import { setReply } from '@/app/store/slices/replySlice'
+import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,14 +11,15 @@ import {
   ContextMenuTrigger,
 } from '@/shared/ContextMenu/ContextMenu'
 import { ScrollArea } from '@/shared/ScrollArea/ScrollArea'
-import { motion, PanInfo } from 'framer-motion'
+import { AnimatePresence, motion, PanInfo } from 'framer-motion'
 import { Copy, CopyCheck, Reply } from 'lucide-react'
 import {
   forwardRef,
-  LegacyRef,
   MouseEvent,
   MutableRefObject,
   PointerEvent,
+  RefObject,
+  UIEvent,
   useRef,
 } from 'react'
 
@@ -26,9 +29,12 @@ interface IMessages {
 
 const Messages = forwardRef(function Messages(
   { className }: IMessages,
-  ref: LegacyRef<HTMLDivElement>
+  ref: RefObject<HTMLDivElement>
 ) {
   const messages = useAppSelector((state) => state.messages.value)
+  const isScrollAtBottom = useAppSelector(
+    (state) => state.isScrollAtBottom.value
+  )
   const dispatch = useAppDispatch()
   const copyTimeoutID: MutableRefObject<ReturnType<typeof setTimeout>> =
     useRef(undefined)
@@ -108,9 +114,32 @@ const Messages = forwardRef(function Messages(
     pointedDownMessage.current = null
   }
 
+  function onScrollHandler(e: UIEvent<HTMLDivElement>) {
+    const isAtBottom =
+      Math.abs(
+        e.currentTarget.scrollHeight -
+          e.currentTarget.scrollTop -
+          e.currentTarget.clientHeight
+      ) < 100
+    if (isAtBottom) {
+      if (!isScrollAtBottom) {
+        dispatch(setIsScrollAtBottom(true))
+      }
+    } else {
+      if (isScrollAtBottom) {
+        dispatch(setIsScrollAtBottom(false))
+      }
+    }
+  }
+
+  function backToBottomHandler() {
+    ref.current.scrollTop = ref.current.scrollHeight
+  }
+
   return (
     <ScrollArea
       ref={ref}
+      onScroll={(e) => onScrollHandler(e)}
       className={cn(
         'w-full md:w-2/3 max-h-[26rem] md:max-h-[24rem] rounded-md px-4',
         className
@@ -210,6 +239,16 @@ const Messages = forwardRef(function Messages(
           )
         })}
       </ul>
+      <AnimatePresence>
+        {!isScrollAtBottom && (
+          <BackToBottomButton
+            initial={{ x: 60 }}
+            animate={{ x: [60, 0] }}
+            exit={{ x: 60 }}
+            onClick={() => backToBottomHandler()}
+          />
+        )}
+      </AnimatePresence>
     </ScrollArea>
   )
 })

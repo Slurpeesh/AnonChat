@@ -29,6 +29,9 @@ const Form = forwardRef(function Form(
   const reply = useAppSelector((state) => state.reply.value)
   const isConnected = useAppSelector((state) => state.isConnected.value)
   const isWaiting = useAppSelector((state) => state.isWaiting.value)
+  const isScrollAtBottom = useAppSelector(
+    (state) => state.isScrollAtBottom.value
+  )
   const dispatch = useAppDispatch()
   const previousMessageCount = useRef(messages.length)
 
@@ -41,13 +44,7 @@ const Form = forwardRef(function Form(
   }
 
   useEffect(() => {
-    const isAtBottom =
-      Math.abs(
-        scrollableMessages.current.scrollHeight -
-          scrollableMessages.current.scrollTop -
-          scrollableMessages.current.clientHeight
-      ) < 100
-    if (previousMessageCount.current < messages.length && isAtBottom) {
+    if (previousMessageCount.current < messages.length && isScrollAtBottom) {
       scrollableMessages.current.scrollTop =
         scrollableMessages.current.scrollHeight
     }

@@ -21,10 +21,18 @@ import { IReply } from './store/slices/types/types'
 export default function App() {
   const isConnected = useAppSelector((state) => state.isConnected.value)
   const isWaiting = useAppSelector((state) => state.isWaiting.value)
+  const isScrollAtBottom = useAppSelector(
+    (state) => state.isScrollAtBottom.value
+  )
   const dispatch = useAppDispatch()
   const scrollableMessages = useRef(null)
   const inputRef = useRef(null)
+  const isScrollAtBottomRef = useRef(isScrollAtBottom)
   const alertSound = new Audio(aud)
+
+  useEffect(() => {
+    isScrollAtBottomRef.current = isScrollAtBottom
+  }, [isScrollAtBottom])
 
   useEffect(() => {
     function onConnect() {
@@ -87,13 +95,7 @@ export default function App() {
           }
         }, 1000)
       }
-      const isAtBottom =
-        Math.abs(
-          scrollableMessages.current.scrollHeight -
-            scrollableMessages.current.scrollTop -
-            scrollableMessages.current.clientHeight
-        ) < 100
-      if (document.hidden || !isAtBottom) {
+      if (document.hidden || !isScrollAtBottomRef.current) {
         alertSound.pause()
         alertSound.currentTime = 0
         alertSound.play().catch((reason) => {
