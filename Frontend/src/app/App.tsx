@@ -1,4 +1,3 @@
-import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { socket } from '@/app/socket'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
@@ -8,6 +7,7 @@ import Form from '@/widgets/Form/Form'
 import Messages from '@/widgets/Messages/Messages'
 import aud from '@public/sounds/alert.mp3'
 import { useEffect, useRef } from 'react'
+import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { setConnected } from './store/slices/isConnectedSlice'
 import { setWaiting } from './store/slices/isWaitingSlice'
 import {
@@ -137,11 +137,14 @@ export default function App() {
     <div className="text-foreground h-dvh w-dvw flex flex-col overflow-hidden">
       <Header />
       <Main className="relative bg-background flex flex-col flex-grow justify-between items-center p-5">
-        <Messages ref={scrollableMessages} className="z-10 relative" />
+        <Messages
+          ref={scrollableMessages}
+          className="z-10 relative basis-4/5"
+        />
         <Form
           ref={inputRef}
           scrollableMessages={scrollableMessages}
-          className="z-10 relative"
+          className="z-10 relative basis-1/5"
         />
       </Main>
       <Footer />

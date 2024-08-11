@@ -140,10 +140,7 @@ const Messages = forwardRef(function Messages(
     <ScrollArea
       ref={ref}
       onScroll={(e) => onScrollHandler(e)}
-      className={cn(
-        'w-full md:w-2/3 max-h-[26rem] md:max-h-[24rem] rounded-md px-4',
-        className
-      )}
+      className={cn('w-full md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
     >
       <ul>
         {messages.map((message, index, arr) => {
@@ -181,6 +178,7 @@ const Messages = forwardRef(function Messages(
                     onPointerDown={(e) => onPointerDownMessageHandler(e)}
                     data-message-id={index}
                     data-me={message.me}
+                    initial={{ x: 0 }}
                     animate={isLastMessage ? animation : {}}
                     className={messageClassName}
                   >

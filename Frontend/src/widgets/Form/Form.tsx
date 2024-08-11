@@ -83,7 +83,7 @@ const Form = forwardRef(function Form(
   return (
     <form
       className={cn(
-        'flex flex-col justify-center items-center gap-2 w-full sm:w-4/5 lg:w-2/5',
+        'flex flex-col justify-end items-center gap-2 w-full sm:w-4/5 lg:w-2/5',
         className
       )}
       onSubmit={onSubmit}
