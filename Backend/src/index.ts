@@ -1,3 +1,5 @@
+import express from 'express'
+import { createServer } from 'http'
 import { Server, Socket } from 'socket.io'
 import {
   ClientToServerEvents,
@@ -6,12 +8,15 @@ import {
   SocketData,
 } from './types'
 
+const app = express()
+const server = createServer(app)
+
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->({
+>(server, {
   cors: {
     origin: '*',
   },
@@ -70,4 +75,9 @@ io.on('connection', (socket) => {
   })
 })
 
-io.listen(5122)
+app.get('/healthz', (req, res) => {
+  console.log('Server is healthy')
+  res.status(200)
+})
+
+server.listen(5122, () => console.log('Server started on 5122'))
