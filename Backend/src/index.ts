@@ -9,6 +9,7 @@ import {
 
 const httpServer = createServer((req, res) => {
   if (req.url === '/healthz') {
+    console.log('Server is healthy')
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('OK')
   } else {
