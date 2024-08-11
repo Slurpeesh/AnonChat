@@ -1,3 +1,4 @@
+import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { socket } from '@/app/socket'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
@@ -7,7 +8,6 @@ import Form from '@/widgets/Form/Form'
 import Messages from '@/widgets/Messages/Messages'
 import aud from '@public/sounds/alert.mp3'
 import { useEffect, useRef } from 'react'
-import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { setConnected } from './store/slices/isConnectedSlice'
 import { setWaiting } from './store/slices/isWaitingSlice'
 import {
