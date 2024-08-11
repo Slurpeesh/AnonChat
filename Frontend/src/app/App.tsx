@@ -68,6 +68,7 @@ export default function App() {
             copied: false,
           })
         )
+        dispatch(setReply({}))
         scrollableMessages.current.scrollTop =
           scrollableMessages.current.scrollHeight
       } else {
@@ -84,7 +85,6 @@ export default function App() {
           })
         )
       }
-      dispatch(setReply({}))
 
       if (document.hidden && changer === null) {
         changer = setInterval(() => {
