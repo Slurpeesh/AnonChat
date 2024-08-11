@@ -1,4 +1,3 @@
-import express from 'express'
 import { createServer } from 'http'
 import { Server, Socket } from 'socket.io'
 import {
@@ -8,15 +7,22 @@ import {
   SocketData,
 } from './types'
 
-const app = express()
-const server = createServer(app)
+const httpServer = createServer((req, res) => {
+  if (req.url === '/healthz') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end('OK')
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' })
+    res.end('Not Found')
+  }
+})
 
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->(server, {
+>(httpServer, {
   cors: {
     origin: '*',
   },
@@ -75,9 +81,6 @@ io.on('connection', (socket) => {
   })
 })
 
-app.get('/healthz', (req, res) => {
-  console.log('Server is healthy')
-  res.status(200)
+httpServer.listen(5122, () => {
+  console.log('Server is listening on port 5122')
 })
-
-server.listen(5122, () => console.log('Server started on 5122'))
