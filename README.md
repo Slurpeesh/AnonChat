@@ -1,5 +1,5 @@
 > [!WARNING] 
-> **The initial connection may take some time.**
+> **The initial connection may take up to 50 seconds due to free plan of hosting**
 
 # Run on local machine
 ### Backend
