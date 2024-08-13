@@ -25,6 +25,9 @@ const ThemeButton = forwardRef(function ThemeButton(
       ref={ref}
       className="w-12 h-12 p-2 rounded-full transition-colors hover:bg-muted/30"
       onClick={() => changeThemeHandler()}
+      aria-label={
+        theme === 'dark' ? 'Change to light theme' : 'Change to dark theme'
+      }
     >
       {theme == 'light' && <Sun className="h-full w-full stroke-accent" />}
       {theme == 'dark' && <Moon className="h-full w-full stroke-accent" />}

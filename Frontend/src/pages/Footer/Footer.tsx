@@ -7,6 +7,7 @@ export default function Footer() {
         className="h-full hover:scale-110 transition-transform"
         href="https://github.com/Slurpeesh/AnonChat"
         target="_blank"
+        aria-label="Visit GitHub of author"
       >
         <GitHubSvg />
       </a>

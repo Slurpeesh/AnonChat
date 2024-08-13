@@ -111,6 +111,7 @@ const Form = forwardRef(function Form(
               type="button"
               onClick={(e) => onCancelReply(e)}
               className="rounded-full hover:bg-muted/20 p-1 transition-colors"
+              aria-label="Cancel reply"
             >
               <X className="stroke-danger" />
             </button>
@@ -132,6 +133,7 @@ const Form = forwardRef(function Form(
           onMouseLeave={() => onMouseLeaveSendButton()}
           className="p-2 sm:px-6 bg-accent hover:bg-accent-hover rounded-md transition-colors"
           type="submit"
+          aria-label="Send message"
         >
           <MotionSendHorizontal
             variants={sendButtonVariants}
