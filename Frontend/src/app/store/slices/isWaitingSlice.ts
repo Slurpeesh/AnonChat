@@ -13,8 +13,8 @@ export const isWaitingSlice = createSlice({
   name: 'isWaiting',
   initialState,
   reducers: {
-    setWaiting: (state, payload: PayloadAction<boolean>) => {
-      state.value = payload.payload
+    setWaiting: (state, action: PayloadAction<boolean>) => {
+      state.value = action.payload
     },
   },
 })

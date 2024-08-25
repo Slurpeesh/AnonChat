@@ -13,8 +13,8 @@ export const isScrollAtBottomSlice = createSlice({
   name: 'isScrollAtBottom',
   initialState,
   reducers: {
-    setIsScrollAtBottom: (state, payload: PayloadAction<boolean>) => {
-      state.value = payload.payload
+    setIsScrollAtBottom: (state, action: PayloadAction<boolean>) => {
+      state.value = action.payload
     },
   },
 })

@@ -27,8 +27,8 @@ export const messagesSlice = createSlice({
   name: 'messages',
   initialState,
   reducers: {
-    addMessage: (state, payload: PayloadAction<IMessage>) => {
-      state.value.push(payload.payload)
+    addMessage: (state, action: PayloadAction<IMessage>) => {
+      state.value.push(action.payload)
     },
     deleteMessages: (state) => {
       state.value = []
@@ -38,11 +38,11 @@ export const messagesSlice = createSlice({
         message.alerted = true
       })
     },
-    setAlerted: (state, payload: PayloadAction<IStateController>) => {
-      state.value[payload.payload.id].alerted = payload.payload.state
+    setAlerted: (state, action: PayloadAction<IStateController>) => {
+      state.value[action.payload.id].alerted = action.payload.state
     },
-    setCopied: (state, payload: PayloadAction<IStateController>) => {
-      state.value[payload.payload.id].copied = payload.payload.state
+    setCopied: (state, action: PayloadAction<IStateController>) => {
+      state.value[action.payload.id].copied = action.payload.state
     },
   },
 })

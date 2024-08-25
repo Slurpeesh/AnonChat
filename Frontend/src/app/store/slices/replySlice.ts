@@ -14,8 +14,8 @@ export const replySlice = createSlice({
   name: 'reply',
   initialState,
   reducers: {
-    setReply: (state, payload: PayloadAction<IReply>) => {
-      state.value = payload.payload
+    setReply: (state, action: PayloadAction<IReply>) => {
+      state.value = action.payload
     },
   },
 })

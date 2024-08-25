@@ -14,8 +14,8 @@ export const isConnectedSlice = createSlice({
   name: 'isConnected',
   initialState,
   reducers: {
-    setConnected: (state, payload: PayloadAction<boolean>) => {
-      state.value = payload.payload
+    setConnected: (state, action: PayloadAction<boolean>) => {
+      state.value = action.payload
     },
   },
 })
