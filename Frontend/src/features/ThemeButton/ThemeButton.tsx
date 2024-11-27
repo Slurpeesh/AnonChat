@@ -1,4 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
+import {
+  addStyleTagRemovingAllTransitions,
+  removeStyleTagRemovingAllTransitions,
+} from '@/app/lib/styles'
 import { setDark, setLight } from '@/app/store/slices/themeSlice'
 import { motion } from 'framer-motion'
 import { Moon, Sun } from 'lucide-react'
@@ -12,13 +16,18 @@ const ThemeButton = forwardRef(function ThemeButton(
   const dispatch = useAppDispatch()
 
   function changeThemeHandler() {
+    const css = document.createElement('style')
+    addStyleTagRemovingAllTransitions(css)
+
     switch (theme) {
       case 'dark':
         dispatch(setLight())
-        return
+        break
       default:
         dispatch(setDark())
     }
+
+    removeStyleTagRemovingAllTransitions(css)
   }
   return (
     <button
