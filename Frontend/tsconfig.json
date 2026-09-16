@@ -1,23 +1,21 @@
 {
   "compilerOptions": {
-    "outDir": "build",
-    "noImplicitAny": true,
-    "module": "ESNext",
-    "target": "es5",
+    "target": "ES2022",
     "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowJs": true,
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "paths": {
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"]
-    }
+    },
+    "types": ["node"]
   },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+  "include": ["src", "*.config.ts"]
 }

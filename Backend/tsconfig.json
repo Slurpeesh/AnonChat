@@ -1,22 +1,18 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "outDir": "dist",
     "noImplicitAny": true,
-    "module": "CommonJS",
+    "module": "node16",
     "strict": true,
     "target": "ES6",
     "allowJs": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "node16",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["../*"]
-    }
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
     }
   }
 }

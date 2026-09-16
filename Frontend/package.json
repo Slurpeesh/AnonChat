@@ -6,21 +6,22 @@
   "scripts": {
     "start": "webpack serve --env mode=development",
     "build:dev": "webpack --env mode=development",
-    "build:prod": "webpack --env mode=production"
+    "build:prod": "webpack --env mode=production",
+    "typecheck": "tsc --noEmit --watch"
   },
   "keywords": [],
   "author": "Slurpeesh",
   "license": "ISC",
   "devDependencies": {
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@types/dotenv-webpack": "^7.0.7",
-    "@types/node": "^20.14.11",
+    "@types/node": "^20.19.43",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/webpack": "^5.28.5",
     "@types/webpack-bundle-analyzer": "^4.7.0",
     "autoprefixer": "^10.4.19",
-    "copy-webpack-plugin": "^12.0.2",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.2",
     "cssnano": "^7.0.4",
     "dotenv-webpack": "^8.1.0",
@@ -35,12 +36,11 @@
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.7",
     "ts-loader": "^9.5.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.5.3",
+    "typescript": "^5.9.3",
     "webpack": "^5.93.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
+    "webpack-dev-server": "^5.2.6"
   },
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.2.1",
