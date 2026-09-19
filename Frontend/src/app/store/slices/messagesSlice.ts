@@ -1,19 +1,5 @@
-import { RootState } from '@/app/store'
-import { IReply } from '@/app/store/slices/types/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
-interface IStateController {
-  id: number
-  state: boolean
-}
-
-interface IMessage {
-  value: string
-  me: boolean
-  alerted: boolean
-  copied: boolean
-  reply?: IReply
-}
+import { IMessage, IStateController } from './types/types'
 
 export interface IMessagesSlice {
   value: Array<IMessage>
@@ -30,29 +16,40 @@ export const messagesSlice = createSlice({
     addMessage: (state, action: PayloadAction<IMessage>) => {
       state.value.push(action.payload)
     },
-    deleteMessages: (state) => {
+    deleteAllMessages: (state) => {
       state.value = []
     },
-    setAllAlerted: (state) => {
+    setAllAlerted: (state, action: PayloadAction<boolean>) => {
       state.value.forEach((message) => {
-        message.alerted = true
+        message.isAlerted = action.payload
       })
     },
-    setAlerted: (state, action: PayloadAction<IStateController>) => {
-      state.value[action.payload.id].alerted = action.payload.state
+    setIsAlerted: (state, action: PayloadAction<IStateController>) => {
+      const message = state.value.find((msg) => msg.id === action.payload.id)
+
+      if (message === undefined) {
+        throw new Error(`Message with id ${action.payload.id} not found`)
+      }
+
+      message.isAlerted = action.payload.state
     },
-    setCopied: (state, action: PayloadAction<IStateController>) => {
-      state.value[action.payload.id].copied = action.payload.state
+    setIsCopied: (state, action: PayloadAction<IStateController>) => {
+      const message = state.value.find((msg) => msg.id === action.payload.id)
+
+      if (message === undefined) {
+        throw new Error(`Message with id ${action.payload.id} not found`)
+      }
+
+      message.isCopied = action.payload.state
     },
   },
 })
 
 export const {
   addMessage,
-  deleteMessages,
+  deleteAllMessages,
   setAllAlerted,
-  setAlerted,
-  setCopied,
+  setIsAlerted,
+  setIsCopied,
 } = messagesSlice.actions
-export const selectMessages = (state: RootState) => state.messages.value
 export default messagesSlice.reducer

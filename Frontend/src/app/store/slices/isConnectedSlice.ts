@@ -1,5 +1,4 @@
 import { socket } from '@/app/socket'
-import { RootState } from '@/app/store'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface IConnectedSlice {
@@ -14,12 +13,11 @@ export const isConnectedSlice = createSlice({
   name: 'isConnected',
   initialState,
   reducers: {
-    setConnected: (state, action: PayloadAction<boolean>) => {
+    setIsConnected: (state, action: PayloadAction<boolean>) => {
       state.value = action.payload
     },
   },
 })
 
-export const { setConnected } = isConnectedSlice.actions
-export const selectIsConnected = (state: RootState) => state.isConnected.value
+export const { setIsConnected } = isConnectedSlice.actions
 export default isConnectedSlice.reducer

@@ -1,15 +1,15 @@
-import { RootState } from '@/app/store'
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
   ? 'dark'
   : 'light'
 
-const html = document.querySelector('html')
-html.setAttribute('class', initialTheme)
+const html = document.documentElement
+html.classList.remove('light', 'dark')
+html.classList.add(initialTheme)
 
 export interface IThemeState {
-  value: string
+  value: 'light' | 'dark'
 }
 
 const initialState: IThemeState = {
@@ -20,17 +20,13 @@ export const themeSlice = createSlice({
   name: 'theme',
   initialState,
   reducers: {
-    setLight: (state) => {
-      html.setAttribute('class', 'light')
-      state.value = 'light'
-    },
-    setDark: (state) => {
-      html.setAttribute('class', 'dark')
-      state.value = 'dark'
+    setTheme: (state, action) => {
+      html.classList.remove('light', 'dark')
+      html.classList.add(action.payload)
+      state.value = action.payload
     },
   },
 })
 
-export const { setLight, setDark } = themeSlice.actions
-export const selectTheme = (state: RootState) => state.theme.value
+export const { setTheme } = themeSlice.actions
 export default themeSlice.reducer

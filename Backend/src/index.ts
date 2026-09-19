@@ -1,11 +1,12 @@
-import { createServer } from 'http'
-import { Server, Socket } from 'socket.io'
 import {
   ClientToServerEvents,
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
-} from './types'
+} from '@/sharedTypes'
+import { randomUUID } from 'crypto'
+import { createServer } from 'http'
+import { Server, Socket } from 'socket.io'
 
 const httpServer = createServer((req, res) => {
   if (req.url === '/healthz') {
@@ -38,7 +39,7 @@ function joinQueue(
     ServerToClientEvents,
     InterServerEvents,
     SocketData
-  >
+  >,
 ) {
   if (waitingId === null) {
     const id = Date.now().toString()
@@ -78,7 +79,7 @@ io.on('connection', (socket) => {
     })
   })
   socket.on('createMessage', (msg: string, reply) => {
-    io.to(socket.data.room).emit('message', msg, socket.id, reply)
+    io.to(socket.data.room).emit('message', randomUUID(), msg, socket.id, reply)
   })
 })
 

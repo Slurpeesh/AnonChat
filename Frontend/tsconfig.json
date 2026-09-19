@@ -6,6 +6,8 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "noImplicitAny": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,

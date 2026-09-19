@@ -1,5 +1,4 @@
-import { RootState } from '@/app/store'
-import { IReply } from '@/app/store/slices/types/types'
+import { IReply } from '@/app/sharedTypes'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface IReplySlice {
@@ -7,7 +6,7 @@ export interface IReplySlice {
 }
 
 const initialState: IReplySlice = {
-  value: {},
+  value: null,
 }
 
 export const replySlice = createSlice({
@@ -21,5 +20,4 @@ export const replySlice = createSlice({
 })
 
 export const { setReply } = replySlice.actions
-export const selectReplySlice = (state: RootState) => state.reply.value
 export default replySlice.reducer

@@ -1,4 +1,3 @@
-import { RootState } from '@/app/store'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface IWaitingSlice {
@@ -13,12 +12,11 @@ export const isWaitingSlice = createSlice({
   name: 'isWaiting',
   initialState,
   reducers: {
-    setWaiting: (state, action: PayloadAction<boolean>) => {
+    setIsWaiting: (state, action: PayloadAction<boolean>) => {
       state.value = action.payload
     },
   },
 })
 
-export const { setWaiting } = isWaitingSlice.actions
-export const selectIsWaiting = (state: RootState) => state.isWaiting.value
+export const { setIsWaiting } = isWaitingSlice.actions
 export default isWaitingSlice.reducer

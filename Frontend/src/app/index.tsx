@@ -1,10 +1,10 @@
+import LazyApp from '@/app/App.lazy'
 import { store } from '@/app/store'
 import '@/index.css'
 import PageLoadingScreen from '@/pages/PageLoadingScreen/PageLoadingScreen'
 import { Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import LazyApp from './App.lazy'
 
 const root = document.getElementById('root')
 
@@ -19,5 +19,5 @@ container.render(
     <Suspense fallback={<PageLoadingScreen />}>
       <LazyApp />
     </Suspense>
-  </Provider>
+  </Provider>,
 )

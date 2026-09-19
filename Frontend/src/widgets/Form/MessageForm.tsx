@@ -1,75 +1,50 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
-import { cn } from '@/app/lib/utils'
+import { cn, MESSAGE_AUTHOR_ME, MESSAGE_AUTHOR_OTHER } from '@/app/lib/utils'
 import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, Variants } from 'framer-motion'
 import { Reply, X } from 'lucide-react'
-import {
-  FormEvent,
-  forwardRef,
-  MouseEvent,
-  MutableRefObject,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import MotionSendHorizontal from './MotionSendHorizontal'
 
-interface IMyForm {
-  scrollableMessages: MutableRefObject<any>
+const SEND_BUTTON_VARIANTS: Variants = {
+  hover: {
+    rotate: [0, 10, -10, 0],
+    scale: 1.1,
+  },
+  initial: { rotate: 0, scale: 1 },
+}
+const REPLY_MAX_LENGTH = 70
+
+interface IMessageForm {
   className?: string
 }
-const Form = forwardRef(function Form(
-  { scrollableMessages, className }: IMyForm,
-  ref: MutableRefObject<any>
-) {
-  const [value, setValue] = useState('')
-  const [isHovered, setIsHovered] = useState(false)
-  const messages = useAppSelector((state) => state.messages.value)
+
+export default function MessageForm({ className }: IMessageForm) {
   const reply = useAppSelector((state) => state.reply.value)
   const isConnected = useAppSelector((state) => state.isConnected.value)
   const isWaiting = useAppSelector((state) => state.isWaiting.value)
-  const isScrollAtBottom = useAppSelector(
-    (state) => state.isScrollAtBottom.value
-  )
   const dispatch = useAppDispatch()
-  const previousMessageCount = useRef(messages.length)
-
-  const sendButtonVariants = {
-    hover: {
-      rotate: [0, 10, -10, 0],
-      scale: 1.1,
-    },
-    initial: { rotate: 0, scale: 1 },
-  }
-
-  useEffect(() => {
-    if (previousMessageCount.current < messages.length && isScrollAtBottom) {
-      scrollableMessages.current.scrollTop =
-        scrollableMessages.current.scrollHeight
-    }
-    previousMessageCount.current = messages.length
-  }, [messages])
+  const [value, setValue] = useState('')
+  const [isHovered, setIsHovered] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
+    const trimmedValue = value.trim()
+    if (trimmedValue === '') return
+
+    dispatch(setReply(null))
     setValue('')
-    if (value.trim()) {
-      socket.emit('createMessage', value, reply)
-      scrollableMessages.current.scrollTop =
-        scrollableMessages.current.scrollHeight
-    }
+    socket.emit('createMessage', trimmedValue, reply)
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      ref.current.focus()
-    })
+    inputRef.current?.focus()
   }, [reply])
 
-  function onCancelReply(e: MouseEvent<HTMLButtonElement>) {
-    e.preventDefault()
-    dispatch(setReply({}))
+  function onCancelReply() {
+    dispatch(setReply(null))
   }
 
   function onMouseEnterSendButton() {
@@ -84,12 +59,12 @@ const Form = forwardRef(function Form(
     <form
       className={cn(
         'flex flex-col justify-end items-center gap-2 w-full sm:w-4/5 lg:w-2/5',
-        className
+        className,
       )}
       onSubmit={onSubmit}
     >
       <AnimatePresence>
-        {Object.keys(reply).length !== 0 && (
+        {reply !== null && (
           <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -100,16 +75,20 @@ const Form = forwardRef(function Form(
             <div className="flex justify-center items-center gap-2">
               <Reply />
               <p className="break-all">
-                <span className="font-semibold">{reply.author}: </span>
-                {reply.value.length > 70
-                  ? reply.value.slice(0, 70) + '...'
+                <span className="font-semibold">
+                  {(reply.isRepliedMessageMine
+                    ? MESSAGE_AUTHOR_ME
+                    : MESSAGE_AUTHOR_OTHER) + ': '}
+                </span>
+                {reply.value.length > REPLY_MAX_LENGTH
+                  ? reply.value.slice(0, REPLY_MAX_LENGTH) + '…'
                   : reply.value}
               </p>
             </div>
 
             <button
               type="button"
-              onClick={(e) => onCancelReply(e)}
+              onClick={() => onCancelReply()}
               className="rounded-full hover:bg-muted/20 p-1 transition-colors"
               aria-label="Cancel reply"
             >
@@ -120,7 +99,7 @@ const Form = forwardRef(function Form(
       </AnimatePresence>
       <div className="flex justify-between gap-5 w-full">
         <input
-          ref={ref}
+          ref={inputRef}
           className="rounded-lg px-2 w-full bg-background-section"
           value={value}
           placeholder="Write a message"
@@ -136,7 +115,7 @@ const Form = forwardRef(function Form(
           aria-label="Send message"
         >
           <MotionSendHorizontal
-            variants={sendButtonVariants}
+            variants={SEND_BUTTON_VARIANTS}
             animate={isHovered ? 'hover' : 'initial'}
             transition={{ duration: 0.25 }}
             className="stroke-foreground ml-auto"
@@ -145,6 +124,4 @@ const Form = forwardRef(function Form(
       </div>
     </form>
   )
-})
-
-export default Form
+}

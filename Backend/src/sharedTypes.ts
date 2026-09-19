@@ -1,11 +1,20 @@
-interface IReply {
-  author?: 'Me' | 'Stranger'
-  value?: string
+interface IReplyData {
+  repliedMessageId: string
+  value: string
+  isRepliedMessageMine: boolean
 }
+
+type IReply = IReplyData | null
+
 export interface ServerToClientEvents {
   waitingStatus: () => void
   readyStatus: () => void
-  message: (msg: string, id: string, reply?: IReply) => void
+  message: (
+    messageId: string,
+    msg: string,
+    socketId: string,
+    reply: IReply,
+  ) => void
 }
 
 export interface ClientToServerEvents {

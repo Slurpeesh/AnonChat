@@ -1,9 +1,20 @@
-import { IReply } from './store/slices/types/types'
+interface IReplyData {
+  repliedMessageId: string
+  value: string
+  isRepliedMessageMine: boolean
+}
+
+export type IReply = IReplyData | null
 
 export interface ServerToClientEvents {
   waitingStatus: () => void
   readyStatus: () => void
-  message: (msg: string, id: string, reply: IReply) => void
+  message: (
+    messageId: string,
+    msg: string,
+    socketId: string,
+    reply: IReply,
+  ) => void
 }
 
 export interface ClientToServerEvents {
