@@ -7,6 +7,7 @@ import {
 import { randomUUID } from 'crypto'
 import { createServer } from 'http'
 import { Server, Socket } from 'socket.io'
+import { ReplySchema } from './schemas'
 
 const httpServer = createServer((req, res) => {
   if (req.url === '/healthz') {
@@ -79,6 +80,12 @@ io.on('connection', (socket) => {
     })
   })
   socket.on('createMessage', (msg: string, reply) => {
+    const parsed = ReplySchema.safeParse(reply)
+    if (!parsed.success) {
+      console.error('Invalid reply from client:', parsed.error.issues)
+      return
+    }
+
     io.to(socket.data.room).emit('message', randomUUID(), msg, socket.id, reply)
   })
 })

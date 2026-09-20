@@ -1,10 +1,9 @@
-interface IReplyData {
-  repliedMessageId: string
-  value: string
-  isRepliedMessageMine: boolean
-}
+import { ReplySchema } from '@/schemas'
+import z from 'zod'
 
-type IReply = IReplyData | null
+// synchronize with client types
+
+export type IReply = z.infer<typeof ReplySchema>
 
 export interface ServerToClientEvents {
   waitingStatus: () => void

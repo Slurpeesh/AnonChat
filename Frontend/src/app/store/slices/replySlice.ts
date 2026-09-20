@@ -1,4 +1,4 @@
-import { IReply } from '@/app/sharedTypes'
+import { IReply } from '@/sharedTypes'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface IReplySlice {

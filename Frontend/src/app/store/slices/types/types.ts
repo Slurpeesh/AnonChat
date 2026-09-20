@@ -1,4 +1,4 @@
-import { IReply } from '@/app/sharedTypes'
+import { IReply } from '@/sharedTypes'
 
 export interface IStateController {
   id: string

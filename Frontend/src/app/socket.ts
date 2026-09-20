@@ -1,4 +1,4 @@
-import { ClientToServerEvents, ServerToClientEvents } from '@/app/sharedTypes'
+import { ClientToServerEvents, ServerToClientEvents } from '@/sharedTypes'
 import { io, Socket } from 'socket.io-client'
 
 const URL =

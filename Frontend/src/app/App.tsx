@@ -1,9 +1,10 @@
-import { IReply } from '@/app/sharedTypes'
 import { socket } from '@/app/socket'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
 import Main from '@/pages/Main/Main'
+import { ReplySchema } from '@/schemas'
+import { IReply } from '@/sharedTypes'
 import MessageForm from '@/widgets/Form/MessageForm'
 import Messages from '@/widgets/Messages/Messages'
 import { useEffect } from 'react'
@@ -51,6 +52,12 @@ export default function App() {
       socketId: string,
       reply: IReply,
     ) {
+      const parsed = ReplySchema.safeParse(reply)
+      if (!parsed.success) {
+        console.error('Invalid reply from server:', parsed.error.issues)
+        return
+      }
+
       const isMe = socket.id === socketId
 
       if (!isMe && reply !== null) {
