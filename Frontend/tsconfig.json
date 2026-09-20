@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "esnext",
@@ -20,6 +21,17 @@
       "@public/*": ["./public/*"]
     },
     "types": ["node"]
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "bundler"
+    },
+    "moduleTypes": {
+      "webpack.config.ts": "cjs",
+      "config/build/**/*": "cjs"
+    }
   },
   "include": ["src", "*.config.ts"]
 }
