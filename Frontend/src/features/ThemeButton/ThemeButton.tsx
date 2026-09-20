@@ -4,8 +4,8 @@ import {
   removeStyleTagRemovingAllTransitions,
 } from '@/app/lib/styles'
 import { setTheme } from '@/app/store/slices/themeSlice'
-import { motion } from 'framer-motion'
 import { Moon, Sun } from 'lucide-react'
+import { motion } from 'motion/react'
 import { forwardRef } from 'react'
 
 const ThemeButton = forwardRef<HTMLButtonElement>(

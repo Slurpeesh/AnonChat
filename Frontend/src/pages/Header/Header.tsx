@@ -1,7 +1,7 @@
 import ThemeButton from '@/features/ThemeButton/ThemeButton'
 import { ConnectionManager } from '@/widgets/ConnectionManager'
 import { ConnectionState } from '@/widgets/ConnectonState'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import AnonChatSvg from './svg/AnonChatSvg'
 
 export default function Header() {

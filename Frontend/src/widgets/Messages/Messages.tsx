@@ -4,7 +4,7 @@ import { setIsAlerted } from '@/app/store/slices/messagesSlice'
 import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
 import { ScrollArea } from '@/shared/ScrollArea/ScrollArea'
 import aud from '@public/sounds/alert.mp3'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'motion/react'
 import { UIEvent, useCallback, useEffect, useRef, useState } from 'react'
 import Message from './Message'
 

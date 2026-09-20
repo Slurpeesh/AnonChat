@@ -1,5 +1,5 @@
-import { HTMLMotionProps, motion } from 'framer-motion'
 import { ArrowDown } from 'lucide-react'
+import { HTMLMotionProps, motion } from 'motion/react'
 
 interface IBackToBottomButton extends HTMLMotionProps<'button'> {
   [key: string]: any

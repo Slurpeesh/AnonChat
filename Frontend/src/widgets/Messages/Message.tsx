@@ -14,8 +14,8 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/shared/ContextMenu/ContextMenu'
-import { motion, PanInfo } from 'framer-motion'
 import { Copy, CopyCheck, Reply } from 'lucide-react'
+import { motion, PanInfo } from 'motion/react'
 import { memo, useRef } from 'react'
 
 const DRAG_CONSTRAINTS_MINE = { left: -150, right: 0 }
