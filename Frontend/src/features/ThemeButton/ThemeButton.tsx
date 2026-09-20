@@ -9,7 +9,7 @@ import { Moon, Sun } from 'lucide-react'
 import { forwardRef } from 'react'
 
 const ThemeButton = forwardRef<HTMLButtonElement>(
-  function ThemeButton(props, ref) {
+  function ThemeButton(_props, ref) {
     const theme = useAppSelector((state) => state.theme.value)
     const dispatch = useAppDispatch()
 

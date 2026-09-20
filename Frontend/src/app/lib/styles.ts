@@ -7,13 +7,15 @@ export function addStyleTagRemovingAllTransitions(css: HTMLStyleElement) {
        -o-transition: none !important;
        -ms-transition: none !important;
        transition: none !important;
-    }`
-    )
+    }`,
+    ),
   )
   document.head.appendChild(css)
 }
 
 export function removeStyleTagRemovingAllTransitions(css: HTMLStyleElement) {
-  const _ = window.getComputedStyle(css).opacity
+  // Force reflow so `transition: none` takes effect before removal
+  // Prevents animating the theme switch
+  void window.getComputedStyle(css).opacity
   document.head.removeChild(css)
 }
