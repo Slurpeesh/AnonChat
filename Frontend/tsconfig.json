@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "allowJs": true,
     "noImplicitAny": true,
     "strict": true,
     "noUnusedLocals": true,
@@ -22,16 +20,5 @@
     },
     "types": ["node"]
   },
-  "ts-node": {
-    "transpileOnly": true,
-    "compilerOptions": {
-      "module": "CommonJS",
-      "moduleResolution": "bundler"
-    },
-    "moduleTypes": {
-      "webpack.config.ts": "cjs",
-      "config/build/**/*": "cjs"
-    }
-  },
-  "include": ["src", "*.config.ts"]
+  "include": ["src", "vite.config.mts"]
 }
