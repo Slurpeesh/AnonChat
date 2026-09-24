@@ -17,7 +17,7 @@ export default function Header() {
         <h1 className="font-extrabold text-xl md:text-3xl">AnonChat</h1>
       </motion.a>
       <div className="flex items-center gap-3">
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.DEV && (
           <>
             <ConnectionState />
             <ConnectionManager />
