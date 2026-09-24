@@ -1,8 +1,9 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     host: '127.0.0.1',
     port: 3000,
@@ -17,7 +18,6 @@ export default defineConfig(({ mode }) => ({
     tsconfigPaths: true,
   },
   css: {
-    postcss: './postcss.config.cjs',
     devSourcemap: mode === 'development',
   },
 }))

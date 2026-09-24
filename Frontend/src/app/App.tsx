@@ -123,7 +123,7 @@ export default function App() {
   return (
     <div className="text-foreground h-dvh w-dvw flex flex-col overflow-hidden">
       <Header />
-      <Main className="relative bg-background flex flex-col flex-grow justify-between items-center p-5">
+      <Main className="relative bg-background flex flex-col grow justify-between items-center p-5">
         <Messages className="z-10 relative basis-4/5" />
         <MessageForm className="z-10 relative basis-1/5" />
       </Main>

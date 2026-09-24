@@ -1,29 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-theme-background: 0 0% 90%;
+  --color-theme-foreground: 0 0% 10%;
+  --color-theme-accent: 142 71% 45%;
+  --color-theme-accent-hover: 142 71% 55%;
+  --color-theme-accent-mild: 142 70% 85%;
+  --color-theme-background-section: 0 0% 100%;
+  --color-theme-muted: 0 0% 50%;
+  --color-theme-alert: 47 90% 64%;
+  --color-theme-danger: 0 72% 51%;
+}
+
+.dark {
+  --color-theme-background: 0 0% 0%;
+  --color-theme-foreground: 0 0% 90%;
+  --color-theme-accent: 142 71% 45%;
+  --color-theme-accent-hover: 142 71% 35%;
+  --color-theme-accent-mild: 142 40% 15%;
+  --color-theme-background-section: 0 0% 15%;
+  --color-theme-muted: 0 0% 50%;
+  --color-theme-alert: 47 90% 34%;
+  --color-theme-danger: 0 72% 51%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--color-theme-background));
+  --color-foreground: hsl(var(--color-theme-foreground));
+  --color-accent: hsl(var(--color-theme-accent));
+  --color-accent-hover: hsl(var(--color-theme-accent-hover));
+  --color-accent-mild: hsl(var(--color-theme-accent-mild));
+  --color-background-section: hsl(var(--color-theme-background-section));
+  --color-muted: hsl(var(--color-theme-muted));
+  --color-alert: hsl(var(--color-theme-alert));
+  --color-danger: hsl(var(--color-theme-danger));
+}
 
 @layer base {
-  :root {
-    --color-background: 0 0% 90%;
-    --color-foreground: 0 0% 10%;
-    --color-background-section: 0 0% 100%;
-    --color-accent-mild: 142 70% 85%;
-    --color-accent: 142 71% 45%;
-    --color-accent-hover: 142 71% 55%;
-    --color-muted: 0 0% 50%;
-    --color-alert: 47 90% 64%;
-    --color-danger: 0 72% 51%;
-  }
-
-  .dark {
-    --color-background: 0 0% 0%;
-    --color-foreground: 0 0% 90%;
-    --color-background-section: 0 0% 15%;
-    --color-accent-mild: 142 40% 15%;
-    --color-accent: 142 71% 45%;
-    --color-accent-hover: 142 71% 35%;
-    --color-muted: 0 0% 50%;
-    --color-alert: 47 90% 34%;
-    --color-danger: 0 72% 51%;
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }

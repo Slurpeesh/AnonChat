@@ -7,7 +7,8 @@
     "build": "tsc",
     "setup": "tsc && node dist/index.js",
     "start": "tsx watch src/index.ts",
-    "typecheck": "tsc --noEmit --watch"
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch"
   },
   "keywords": [],
   "author": "Slurpeesh",
