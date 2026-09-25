@@ -1,5 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
-import { cn, MESSAGE_AUTHOR_ME, MESSAGE_AUTHOR_OTHER } from '@/app/lib/utils'
+import {
+  cn,
+  MESSAGE_AUTHOR_DIVIDER,
+  MESSAGE_AUTHOR_ME,
+  MESSAGE_AUTHOR_OTHER,
+} from '@/app/lib/utils'
 import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
 import { Reply, X } from 'lucide-react'
@@ -78,7 +83,7 @@ export default function MessageForm({ className }: IMessageForm) {
                 <span className="font-semibold">
                   {(reply.isRepliedMessageMine
                     ? MESSAGE_AUTHOR_ME
-                    : MESSAGE_AUTHOR_OTHER) + ': '}
+                    : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
                 </span>
                 {reply.value.length > REPLY_MAX_LENGTH
                   ? reply.value.slice(0, REPLY_MAX_LENGTH) + '…'

@@ -3,10 +3,11 @@ import { cn, MESSAGE_ALERT_DURATION } from '@/app/lib/utils'
 import { setIsAlerted } from '@/app/store/slices/messagesSlice'
 import aud from '@/assets/sounds/alert.mp3'
 import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
+import { MessageGroup } from '@/entities/Message'
 import { ScrollArea } from '@/shared/ScrollArea/ScrollArea'
 import { AnimatePresence } from 'motion/react'
 import { UIEvent, useCallback, useEffect, useRef, useState } from 'react'
-import Message from './Message'
+import ChatMessage from './ChatMessage'
 
 interface IMessages {
   className?: string
@@ -73,8 +74,8 @@ export default function Messages({ className }: IMessages) {
   }, [messages])
 
   const onMessageReply = useCallback((repliedMessageId: string) => {
-    const messageElement = document.querySelector<HTMLElement>(
-      `li[data-message-id="${repliedMessageId}"]`,
+    const messageElement = document.getElementById(
+      `message-${repliedMessageId}`,
     )
     if (messageElement === null) return
 
@@ -118,12 +119,12 @@ export default function Messages({ className }: IMessages) {
     <ScrollArea
       ref={scrollRef}
       onScroll={(e) => onScrollHandler(e)}
-      className={cn('w-full md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
+      className={cn('md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
     >
-      <ul>
+      <MessageGroup>
         {messages.map((message, index, arr) => {
           return (
-            <Message
+            <ChatMessage
               key={message.id}
               message={message}
               isLastMessage={index === arr.length - 1}
@@ -131,7 +132,7 @@ export default function Messages({ className }: IMessages) {
             />
           )
         })}
-      </ul>
+      </MessageGroup>
       <AnimatePresence>
         {!isScrollAtBottom && (
           <BackToBottomButton

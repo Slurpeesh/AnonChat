@@ -2,12 +2,15 @@ import { useAppDispatch } from '@/app/hooks/useActions'
 import {
   cn,
   MESSAGE_ALERT_DURATION,
+  MESSAGE_AUTHOR_DIVIDER,
   MESSAGE_AUTHOR_ME,
   MESSAGE_AUTHOR_OTHER,
 } from '@/app/lib/utils'
 import { setIsCopied } from '@/app/store/slices/messagesSlice'
 import { setReply } from '@/app/store/slices/replySlice'
 import { IMessage } from '@/app/store/slices/types/types'
+import { Message, MessageContent } from '@/entities/Message'
+import { Bubble, BubbleContent } from '@/features/Bubble'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -15,7 +18,7 @@ import {
   ContextMenuTrigger,
 } from '@/shared/ContextMenu/ContextMenu'
 import { Copy, CopyCheck, Reply } from 'lucide-react'
-import { motion, PanInfo } from 'motion/react'
+import { PanInfo } from 'motion/react'
 import { memo, useRef } from 'react'
 
 const DRAG_CONSTRAINTS_MINE = { left: -150, right: 0 }
@@ -30,7 +33,7 @@ interface IMessageProps {
   onMessageReply: (id: string) => void
 }
 
-const Message = memo(function Message({
+const ChatMessage = memo(function ChatMessage({
   message,
   isLastMessage,
   onMessageReply,
@@ -39,18 +42,10 @@ const Message = memo(function Message({
   const appearAnimation = message.isMine
     ? APPEAR_ANIMATION_MINE
     : APPEAR_ANIMATION_OTHER
-  const messageClassName = cn(
-    `p-2 my-2 rounded-lg w-2/3 break-all transition-colors delay-300`,
-    {
-      'order-first': !message.isMine,
-      'bg-alert': message.isAlerted,
-      'bg-background-section': !message.isAlerted,
-    },
-  )
+  const bubbleVariant = message.isAlerted ? 'alert' : 'secondary'
 
   const dispatch = useAppDispatch()
   const copyTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pointedDownMessageRef = useRef<IMessage | null>(null)
 
   function onCopySelect(e: Event) {
     e.preventDefault()
@@ -80,15 +75,7 @@ const Message = memo(function Message({
     )
   }
 
-  function onPointerDownMessageHandler() {
-    pointedDownMessageRef.current = message
-  }
-
   function onDragEndHandler(info: PanInfo) {
-    const message = pointedDownMessageRef.current
-
-    if (message === null) return
-
     const shouldActivateReply = message.isMine
       ? info.offset.x < -200
       : info.offset.x > 200
@@ -102,7 +89,6 @@ const Message = memo(function Message({
         }),
       )
     }
-    pointedDownMessageRef.current = null
   }
 
   function onContextMenuOpenChanged(isContextMenuOpen: boolean) {
@@ -119,58 +105,64 @@ const Message = memo(function Message({
   }
 
   return (
-    <div className="flex justify-between items-center">
-      <Reply
-        className={cn('stroke-muted', {
-          '-scale-x-100': !message.isMine,
-        })}
-      />
+    <Message
+      align={message.isMine ? 'end' : 'start'}
+      className="justify-between items-center"
+    >
       <ContextMenu
         onOpenChange={(isContextMenuOpen) =>
           onContextMenuOpenChanged(isContextMenuOpen)
         }
       >
-        <ContextMenuTrigger asChild>
-          <motion.li
-            drag="x"
-            dragSnapToOrigin
-            dragConstraints={
-              message.isMine ? DRAG_CONSTRAINTS_MINE : DRAG_CONSTRAINTS_OTHER
-            }
-            dragElastic={0.06}
-            onDragEnd={(_, info) => onDragEndHandler(info)}
-            onPointerDown={() => onPointerDownMessageHandler()}
-            data-message-id={message.id}
-            initial={{ x: 0 }}
-            animate={isLastMessage ? appearAnimation : {}}
-            className={messageClassName}
-            style={{
-              transitionDuration: `${MESSAGE_ALERT_DURATION}ms`,
-            }}
-          >
-            {reply !== null && (
-              <button
-                onClick={() => onMessageReply(reply.repliedMessageId)}
-                className="flex flex-col text-accent border-l border-accent pl-2 text-sm w-full"
+        <MessageContent>
+          <ContextMenuTrigger asChild>
+            <Bubble
+              id={`message-${message.id}`}
+              variant={bubbleVariant}
+              drag="x"
+              dragSnapToOrigin
+              dragConstraints={
+                message.isMine ? DRAG_CONSTRAINTS_MINE : DRAG_CONSTRAINTS_OTHER
+              }
+              dragElastic={0.06}
+              onDragEnd={(_, info) => onDragEndHandler(info)}
+              initial={{ x: 0 }}
+              animate={isLastMessage ? appearAnimation : {}}
+            >
+              <BubbleContent
+                className="flex flex-col gap-1 transition-colors delay-300"
+                style={{
+                  transitionDuration: `${MESSAGE_ALERT_DURATION}ms`,
+                }}
               >
-                <Reply className="w-4 h-4" />
-                <div className="break-all text-left">
+                {reply !== null && (
+                  <button
+                    onClick={() => onMessageReply(reply.repliedMessageId)}
+                    className="flex flex-col text-accent border-l border-accent pl-2 text-sm w-full"
+                  >
+                    <Reply className="w-4 h-4" />
+                    <div className="break-all text-left">
+                      <span className="font-semibold">
+                        {(reply.isRepliedMessageMine
+                          ? MESSAGE_AUTHOR_ME
+                          : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
+                      </span>
+                      <span>{reply.value}</span>
+                    </div>
+                  </button>
+                )}
+                <div>
                   <span className="font-semibold">
-                    {(reply.isRepliedMessageMine
+                    {(message.isMine
                       ? MESSAGE_AUTHOR_ME
-                      : MESSAGE_AUTHOR_OTHER) + ': '}
+                      : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
                   </span>
-                  <span>{reply.value}</span>
+                  <span>{message.value}</span>
                 </div>
-              </button>
-            )}
-            <span className="font-semibold">
-              {(message.isMine ? MESSAGE_AUTHOR_ME : MESSAGE_AUTHOR_OTHER) +
-                ': '}
-            </span>
-            {message.value}
-          </motion.li>
-        </ContextMenuTrigger>
+              </BubbleContent>
+            </Bubble>
+          </ContextMenuTrigger>
+        </MessageContent>
         <ContextMenuContent className="text-foreground">
           <ContextMenuItem
             className="flex items-center gap-2"
@@ -197,8 +189,13 @@ const Message = memo(function Message({
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
-    </div>
+      <Reply
+        className={cn('stroke-muted', {
+          '-scale-x-100': !message.isMine,
+        })}
+      />
+    </Message>
   )
 })
 
-export default Message
+export default ChatMessage
