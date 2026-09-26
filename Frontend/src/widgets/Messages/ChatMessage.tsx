@@ -1,10 +1,11 @@
 import { useAppDispatch } from '@/app/hooks/useActions'
 import {
   cn,
-  MESSAGE_ALERT_DURATION,
   MESSAGE_AUTHOR_DIVIDER,
   MESSAGE_AUTHOR_ME,
   MESSAGE_AUTHOR_OTHER,
+  MESSAGE_HIGHLIGHT_DURATION,
+  MESSAGE_UNREAD_DURATION,
 } from '@/app/lib/utils'
 import { setIsCopied } from '@/app/store/slices/messagesSlice'
 import { setReply } from '@/app/store/slices/replySlice'
@@ -42,7 +43,8 @@ const ChatMessage = memo(function ChatMessage({
   const appearAnimation = message.isMine
     ? APPEAR_ANIMATION_MINE
     : APPEAR_ANIMATION_OTHER
-  const bubbleVariant = message.isAlerted ? 'alert' : 'secondary'
+  const bubbleVariant =
+    message.isHighlighted || !message.isRead ? 'alert' : 'secondary'
 
   const dispatch = useAppDispatch()
   const copyTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -132,7 +134,7 @@ const ChatMessage = memo(function ChatMessage({
               <BubbleContent
                 className="flex flex-col gap-1 transition-colors delay-300 whitespace-pre-wrap"
                 style={{
-                  transitionDuration: `${MESSAGE_ALERT_DURATION}ms`,
+                  transitionDuration: `${message.isHighlighted ? MESSAGE_HIGHLIGHT_DURATION : MESSAGE_UNREAD_DURATION}ms`,
                 }}
               >
                 {reply !== null && (

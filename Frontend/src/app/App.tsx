@@ -12,11 +12,7 @@ import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { APP_TITLE } from './lib/utils'
 import { setIsConnected } from './store/slices/isConnectedSlice'
 import { setIsWaiting } from './store/slices/isWaitingSlice'
-import {
-  addMessage,
-  deleteAllMessages,
-  setAllAlerted,
-} from './store/slices/messagesSlice'
+import { addMessage, deleteAllMessages } from './store/slices/messagesSlice'
 
 export default function App() {
   const isConnected = useAppSelector((state) => state.isConnected.value)
@@ -69,7 +65,8 @@ export default function App() {
           id: messageId,
           value,
           isMine: isMe,
-          isAlerted: document.hidden,
+          isRead: isMe,
+          isHighlighted: false,
           reply,
           isCopied: false,
         }),
@@ -89,7 +86,6 @@ export default function App() {
           clearInterval(titleChanger)
           titleChanger = null
         }
-        dispatch(setAllAlerted(false))
         document.title = APP_TITLE
       }
     }

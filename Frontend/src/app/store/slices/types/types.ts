@@ -9,7 +9,8 @@ export interface IMessage {
   id: string
   value: string
   isMine: boolean
-  isAlerted: boolean
+  isRead: boolean
+  isHighlighted: boolean
   isCopied: boolean
   reply: IReply
 }

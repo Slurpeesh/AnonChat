@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
-import { cn, MESSAGE_ALERT_DURATION } from '@/app/lib/utils'
-import { setIsAlerted } from '@/app/store/slices/messagesSlice'
+import { cn, MESSAGE_HIGHLIGHT_DURATION } from '@/app/lib/utils'
+import { markAsRead, setIsHighlighted } from '@/app/store/slices/messagesSlice'
 import aud from '@/assets/sounds/alert.mp3'
 import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
 import { MessageGroup } from '@/entities/Message'
@@ -20,7 +20,7 @@ export default function Messages({ className }: IMessages) {
   const isScrollAtBottomRef = useRef(isScrollAtBottom)
   const scrollRef = useRef<HTMLDivElement>(null)
   const prevCountRef = useRef(messages.length)
-  const alertTimeoutsRef = useRef<
+  const highlightedTimeoutsRef = useRef<
     Record<string, ReturnType<typeof setTimeout>>
   >({})
   const alertSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -30,10 +30,10 @@ export default function Messages({ className }: IMessages) {
 
   useEffect(() => {
     return () => {
-      Object.values(alertTimeoutsRef.current).forEach((timeout) => {
+      Object.values(highlightedTimeoutsRef.current).forEach((timeout) => {
         clearTimeout(timeout)
       })
-      alertTimeoutsRef.current = {}
+      highlightedTimeoutsRef.current = {}
     }
   }, [])
 
@@ -73,26 +73,83 @@ export default function Messages({ className }: IMessages) {
     prevCountRef.current = messages.length
   }, [messages])
 
+  const markVisibleMessagesRead = useCallback(() => {
+    if (document.hidden) return
+
+    const scrollArea = scrollRef.current
+    if (!scrollArea) return
+
+    const hasUnread = messages.some((msg) => !msg.isRead)
+    if (!hasUnread) return
+
+    const scrollAreaRect = scrollArea.getBoundingClientRect()
+
+    let lastVisibleIndex = -1
+
+    messages.forEach((message, index) => {
+      if (message.isRead) return
+
+      const messageElement = document.getElementById(`message-${message.id}`)
+      if (!messageElement) return
+
+      const messageRect = messageElement.getBoundingClientRect()
+
+      const visibleTop = Math.max(messageRect.top, scrollAreaRect.top)
+      const visibleBottom = Math.min(messageRect.bottom, scrollAreaRect.bottom)
+      const visibleHeight = Math.max(0, visibleBottom - visibleTop)
+      const visibleRatio = visibleHeight / messageRect.height
+
+      if (visibleRatio >= 0.5) {
+        lastVisibleIndex = index
+      }
+    })
+
+    if (lastVisibleIndex < 0) return
+
+    const idsToMark: string[] = []
+    for (let i = 0; i <= lastVisibleIndex; i++) {
+      const message = messages[i]
+      if (message && !message.isRead) {
+        idsToMark.push(message.id)
+      }
+    }
+
+    if (idsToMark.length > 0) {
+      dispatch(markAsRead(idsToMark))
+    }
+  }, [messages, dispatch])
+
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.hidden) return
+      markVisibleMessagesRead()
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [markVisibleMessagesRead])
+
   const onMessageReply = useCallback((repliedMessageId: string) => {
     const messageElement = document.getElementById(
       `message-${repliedMessageId}`,
     )
     if (messageElement === null) return
 
-    const existingTimeout = alertTimeoutsRef.current[repliedMessageId]
+    const existingTimeout = highlightedTimeoutsRef.current[repliedMessageId]
     if (existingTimeout !== undefined) {
       clearTimeout(existingTimeout)
     }
 
-    dispatch(setIsAlerted({ id: repliedMessageId, state: true }))
+    dispatch(setIsHighlighted({ id: repliedMessageId, state: true }))
 
     setTimeout(() => {
       messageElement.scrollIntoView({ behavior: 'smooth' })
     })
-    alertTimeoutsRef.current[repliedMessageId] = setTimeout(() => {
-      dispatch(setIsAlerted({ id: repliedMessageId, state: false }))
-      delete alertTimeoutsRef.current[repliedMessageId]
-    }, MESSAGE_ALERT_DURATION)
+    highlightedTimeoutsRef.current[repliedMessageId] = setTimeout(() => {
+      dispatch(setIsHighlighted({ id: repliedMessageId, state: false }))
+      delete highlightedTimeoutsRef.current[repliedMessageId]
+    }, MESSAGE_HIGHLIGHT_DURATION)
   }, [])
 
   function onScrollHandler(e: UIEvent<HTMLDivElement>) {
@@ -106,6 +163,8 @@ export default function Messages({ className }: IMessages) {
     if (isAtBottom !== isScrollAtBottom) {
       setIsScrollAtBottom(isAtBottom)
     }
+
+    markVisibleMessagesRead()
   }
 
   function backToBottomHandler() {
