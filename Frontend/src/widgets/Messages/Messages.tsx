@@ -1,6 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { cn, MESSAGE_HIGHLIGHT_DURATION } from '@/app/lib/utils'
-import { markAsRead, setIsHighlighted } from '@/app/store/slices/messagesSlice'
+import { selectLastMessage } from '@/app/store'
+import {
+  markAsRead,
+  setIsHighlighted,
+} from '@/app/store/slices/messageGroupsSlice'
 import aud from '@/assets/sounds/alert.mp3'
 import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
 import { MessageGroup } from '@/entities/Message'
@@ -9,17 +13,18 @@ import { AnimatePresence } from 'motion/react'
 import { UIEvent, useCallback, useEffect, useRef, useState } from 'react'
 import ChatMessage from './ChatMessage'
 
-interface IMessages {
+interface IMessagesProps {
   className?: string
 }
 
-export default function Messages({ className }: IMessages) {
-  const messages = useAppSelector((state) => state.messages.value)
+export default function Messages({ className }: IMessagesProps) {
+  const messageGroups = useAppSelector((state) => state.messageGroups.value)
+  const lastMessage = useAppSelector(selectLastMessage)
   const dispatch = useAppDispatch()
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(true)
   const isScrollAtBottomRef = useRef(isScrollAtBottom)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const prevCountRef = useRef(messages.length)
+  const prevLastMessageIdRef = useRef<string | null>(null)
   const highlightedTimeoutsRef = useRef<
     Record<string, ReturnType<typeof setTimeout>>
   >({})
@@ -38,40 +43,28 @@ export default function Messages({ className }: IMessages) {
   }, [])
 
   useEffect(() => {
-    isScrollAtBottomRef.current = isScrollAtBottom
-  }, [isScrollAtBottom])
+    if (!lastMessage) return
+    if (lastMessage.id === prevLastMessageIdRef.current) return
+    prevLastMessageIdRef.current = lastMessage.id
 
-  useEffect(() => {
-    if (messages.length > prevCountRef.current) {
-      const lastMessage = messages.at(-1)
+    const isLastMessageFromMe = lastMessage.isMine
+    const isScrollAtBottom = isScrollAtBottomRef.current
 
-      if (lastMessage === undefined) {
-        throw new Error('Last message cannot be undefined')
-      }
-
-      const isLastMessageFromMe = lastMessage.isMine
-      const isScrollAtBottom = isScrollAtBottomRef.current
-
-      if (isLastMessageFromMe || isScrollAtBottom) {
-        const scroll = scrollRef.current
-        if (scroll) scroll.scrollTop = scroll.scrollHeight
-      }
-      if (!isLastMessageFromMe && (document.hidden || !isScrollAtBottom)) {
-        const alertSound = alertSoundRef.current
-
-        if (alertSound === null) {
-          throw new Error('Alert sound is not initialized')
-        }
-
-        alertSound.pause()
-        alertSound.currentTime = 0
-        alertSound.play().catch((reason) => {
-          console.error(reason)
-        })
-      }
+    if (isLastMessageFromMe || isScrollAtBottom) {
+      const scroll = scrollRef.current
+      if (scroll) scroll.scrollTop = scroll.scrollHeight
     }
-    prevCountRef.current = messages.length
-  }, [messages])
+
+    if (!isLastMessageFromMe && (document.hidden || !isScrollAtBottom)) {
+      const alertSound = alertSoundRef.current
+      if (alertSound === null) {
+        throw new Error('Alert sound is not initialized')
+      }
+      alertSound.pause()
+      alertSound.currentTime = 0
+      alertSound.play().catch((reason) => console.error(reason))
+    }
+  }, [lastMessage])
 
   const markVisibleMessagesRead = useCallback(() => {
     if (document.hidden) return
@@ -79,45 +72,42 @@ export default function Messages({ className }: IMessages) {
     const scrollArea = scrollRef.current
     if (!scrollArea) return
 
-    const hasUnread = messages.some((msg) => !msg.isRead)
-    if (!hasUnread) return
-
     const scrollAreaRect = scrollArea.getBoundingClientRect()
+    let lastVisibleId: string | null = null
+    let foundUnread = false
 
-    let lastVisibleIndex = -1
+    for (const group of messageGroups) {
+      for (const message of group.messages) {
+        if (message.isRead) continue
+        foundUnread = true
 
-    messages.forEach((message, index) => {
-      if (message.isRead) return
+        const el = document.getElementById(`message-${message.id}`)
+        if (!el) continue
 
-      const messageElement = document.getElementById(`message-${message.id}`)
-      if (!messageElement) return
-
-      const messageRect = messageElement.getBoundingClientRect()
-
-      const visibleTop = Math.max(messageRect.top, scrollAreaRect.top)
-      const visibleBottom = Math.min(messageRect.bottom, scrollAreaRect.bottom)
-      const visibleHeight = Math.max(0, visibleBottom - visibleTop)
-      const visibleRatio = visibleHeight / messageRect.height
-
-      if (visibleRatio >= 0.5) {
-        lastVisibleIndex = index
+        const rect = el.getBoundingClientRect()
+        const visibleTop = Math.max(rect.top, scrollAreaRect.top)
+        const visibleBottom = Math.min(rect.bottom, scrollAreaRect.bottom)
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop)
+        if (visibleHeight / rect.height >= 0.5) {
+          lastVisibleId = message.id
+        }
       }
-    })
+    }
 
-    if (lastVisibleIndex < 0) return
+    if (!foundUnread) return
+    if (!lastVisibleId) return
 
     const idsToMark: string[] = []
-    for (let i = 0; i <= lastVisibleIndex; i++) {
-      const message = messages[i]
-      if (message && !message.isRead) {
-        idsToMark.push(message.id)
+    for (const group of messageGroups) {
+      for (const message of group.messages) {
+        if (!message.isRead) idsToMark.push(message.id)
+        if (message.id === lastVisibleId) {
+          dispatch(markAsRead(idsToMark))
+          return
+        }
       }
     }
-
-    if (idsToMark.length > 0) {
-      dispatch(markAsRead(idsToMark))
-    }
-  }, [messages, dispatch])
+  }, [messageGroups, dispatch])
 
   useEffect(() => {
     function onVisibilityChange() {
@@ -143,9 +133,8 @@ export default function Messages({ className }: IMessages) {
 
     dispatch(setIsHighlighted({ id: repliedMessageId, state: true }))
 
-    setTimeout(() => {
-      messageElement.scrollIntoView({ behavior: 'smooth' })
-    })
+    messageElement.scrollIntoView({ behavior: 'smooth' })
+
     highlightedTimeoutsRef.current[repliedMessageId] = setTimeout(() => {
       dispatch(setIsHighlighted({ id: repliedMessageId, state: false }))
       delete highlightedTimeoutsRef.current[repliedMessageId]
@@ -160,6 +149,7 @@ export default function Messages({ className }: IMessages) {
           e.currentTarget.clientHeight,
       ) < 100
 
+    isScrollAtBottomRef.current = isAtBottom
     if (isAtBottom !== isScrollAtBottom) {
       setIsScrollAtBottom(isAtBottom)
     }
@@ -178,20 +168,33 @@ export default function Messages({ className }: IMessages) {
     <ScrollArea
       ref={scrollRef}
       onScroll={(e) => onScrollHandler(e)}
-      className={cn('w-full md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
+      className={cn(
+        'w-full md:max-w-3xl max-h-[55dvh] rounded-md px-4',
+        className,
+      )}
     >
-      <MessageGroup>
-        {messages.map((message, index, arr) => {
-          return (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              isLastMessage={index === arr.length - 1}
-              onMessageReply={onMessageReply}
-            />
-          )
-        })}
-      </MessageGroup>
+      <div className="flex flex-col gap-6">
+        {messageGroups.map((group) => (
+          <MessageGroup key={group.id} className="gap-2">
+            {group.messages.map((message, index) => {
+              const isLastInGroup = index === group.messages.length - 1
+              const isLastOverall =
+                group.id === messageGroups[messageGroups.length - 1]?.id &&
+                isLastInGroup
+
+              return (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  isLastMessage={isLastOverall}
+                  isFirstInGroup={index === 0}
+                  onMessageReply={onMessageReply}
+                />
+              )
+            })}
+          </MessageGroup>
+        ))}
+      </div>
       <AnimatePresence>
         {!isScrollAtBottom && (
           <BackToBottomButton

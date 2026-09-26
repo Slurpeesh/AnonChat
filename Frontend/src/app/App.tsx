@@ -1,4 +1,8 @@
 import { socket } from '@/app/socket'
+import {
+  addMessage,
+  deleteAllMessages,
+} from '@/app/store/slices/messageGroupsSlice'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
 import Header from '@/pages/Header/Header'
@@ -12,7 +16,6 @@ import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { APP_TITLE } from './lib/utils'
 import { setIsConnected } from './store/slices/isConnectedSlice'
 import { setIsWaiting } from './store/slices/isWaitingSlice'
-import { addMessage, deleteAllMessages } from './store/slices/messagesSlice'
 
 export default function App() {
   const isConnected = useAppSelector((state) => state.isConnected.value)

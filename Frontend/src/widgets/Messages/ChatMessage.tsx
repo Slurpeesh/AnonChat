@@ -7,10 +7,9 @@ import {
   MESSAGE_HIGHLIGHT_DURATION,
   MESSAGE_UNREAD_DURATION,
 } from '@/app/lib/utils'
-import { setIsCopied } from '@/app/store/slices/messagesSlice'
+import { setIsCopied } from '@/app/store/slices/messageGroupsSlice'
 import { setReply } from '@/app/store/slices/replySlice'
-import { IMessage } from '@/app/store/slices/types/types'
-import { Message, MessageContent } from '@/entities/Message'
+import { Message, MessageContent, MessageHeader } from '@/entities/Message'
 import { Bubble, BubbleContent } from '@/features/Bubble'
 import {
   ContextMenu,
@@ -18,6 +17,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/shared/ContextMenu'
+import { IMessage } from '@/types'
 import { Copy, CopyCheck, Reply } from 'lucide-react'
 import { PanInfo } from 'motion/react'
 import { memo, useRef } from 'react'
@@ -28,17 +28,19 @@ const DRAG_CONSTRAINTS_OTHER = { left: 0, right: 150 }
 const APPEAR_ANIMATION_MINE = { x: [50, 0] }
 const APPEAR_ANIMATION_OTHER = { x: [-50, 0] }
 
-interface IMessageProps {
+interface IChatMessageProps {
   message: IMessage
   isLastMessage: boolean
+  isFirstInGroup: boolean
   onMessageReply: (id: string) => void
 }
 
 const ChatMessage = memo(function ChatMessage({
   message,
   isLastMessage,
+  isFirstInGroup,
   onMessageReply,
-}: IMessageProps) {
+}: IChatMessageProps) {
   const reply = message.reply
   const appearAnimation = message.isMine
     ? APPEAR_ANIMATION_MINE
@@ -117,6 +119,11 @@ const ChatMessage = memo(function ChatMessage({
         }
       >
         <MessageContent>
+          {isFirstInGroup && (
+            <MessageHeader className="text-base">
+              {message.isMine ? MESSAGE_AUTHOR_ME : MESSAGE_AUTHOR_OTHER}
+            </MessageHeader>
+          )}
           <ContextMenuTrigger asChild>
             <Bubble
               id={`message-${message.id}`}
@@ -153,14 +160,7 @@ const ChatMessage = memo(function ChatMessage({
                     </div>
                   </button>
                 )}
-                <div>
-                  <span className="font-semibold">
-                    {(message.isMine
-                      ? MESSAGE_AUTHOR_ME
-                      : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
-                  </span>
-                  <span>{message.value}</span>
-                </div>
+                <span>{message.value}</span>
               </BubbleContent>
             </Bubble>
           </ContextMenuTrigger>
