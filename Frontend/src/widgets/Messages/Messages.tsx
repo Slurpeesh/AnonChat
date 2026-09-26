@@ -178,7 +178,7 @@ export default function Messages({ className }: IMessages) {
     <ScrollArea
       ref={scrollRef}
       onScroll={(e) => onScrollHandler(e)}
-      className={cn('md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
+      className={cn('w-full md:w-2/3 max-h-[55dvh] rounded-md px-4', className)}
     >
       <MessageGroup>
         {messages.map((message, index, arr) => {
