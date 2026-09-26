@@ -16,7 +16,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from '@/shared/ContextMenu/ContextMenu'
+} from '@/shared/ContextMenu'
 import { Copy, CopyCheck, Reply } from 'lucide-react'
 import { PanInfo } from 'motion/react'
 import { memo, useRef } from 'react'
@@ -130,7 +130,7 @@ const ChatMessage = memo(function ChatMessage({
               animate={isLastMessage ? appearAnimation : {}}
             >
               <BubbleContent
-                className="flex flex-col gap-1 transition-colors delay-300"
+                className="flex flex-col gap-1 transition-colors delay-300 whitespace-pre-wrap"
                 style={{
                   transitionDuration: `${MESSAGE_ALERT_DURATION}ms`,
                 }}

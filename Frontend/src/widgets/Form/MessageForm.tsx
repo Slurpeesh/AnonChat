@@ -7,9 +7,16 @@ import {
 } from '@/app/lib/utils'
 import { socket } from '@/app/socket'
 import { setReply } from '@/app/store/slices/replySlice'
+import { Textarea } from '@/shared/Textarea'
 import { Reply, X } from 'lucide-react'
 import { AnimatePresence, motion, Variants } from 'motion/react'
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import {
+  FormEvent,
+  KeyboardEvent as ReactKeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import MotionSendHorizontal from './MotionSendHorizontal'
 
 const SEND_BUTTON_VARIANTS: Variants = {
@@ -32,10 +39,13 @@ export default function MessageForm({ className }: IMessageForm) {
   const dispatch = useAppDispatch()
   const [value, setValue] = useState('')
   const [isHovered, setIsHovered] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  function onSubmit(e: FormEvent) {
-    e.preventDefault()
+  useEffect(() => {
+    textareaRef.current?.focus()
+  }, [reply])
+
+  function submitMessage() {
     const trimmedValue = value.trim()
     if (trimmedValue === '') return
 
@@ -44,9 +54,17 @@ export default function MessageForm({ className }: IMessageForm) {
     socket.emit('createMessage', trimmedValue, reply)
   }
 
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [reply])
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    submitMessage()
+  }
+
+  function onKeyDown(e: ReactKeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      submitMessage()
+    }
+  }
 
   function onCancelReply() {
     dispatch(setReply(null))
@@ -103,13 +121,15 @@ export default function MessageForm({ className }: IMessageForm) {
         )}
       </AnimatePresence>
       <div className="flex justify-between gap-5 w-full">
-        <input
-          ref={inputRef}
-          className="rounded-lg px-2 w-full bg-background-section"
+        <Textarea
+          ref={textareaRef}
           value={value}
-          placeholder="Write a message"
           onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => onKeyDown(e)}
+          placeholder="Write a message"
           disabled={!isConnected || isWaiting}
+          rows={1}
+          className="resize-none overflow-hidden"
         />
 
         <button
