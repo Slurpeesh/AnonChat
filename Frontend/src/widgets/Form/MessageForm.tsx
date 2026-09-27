@@ -125,38 +125,40 @@ export default function MessageForm({ className }: IMessageForm) {
       )}
       onSubmit={onSubmit}
     >
-      <AnimatePresence>
-        {reply !== null && (
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ x: 250, opacity: 0 }}
-            transition={{ type: 'spring', bounce: 0 }}
-            className="flex justify-between items-center w-full gap-5 bg-background-section/90 rounded-lg p-2 text-sm"
-          >
-            <div className="flex justify-center items-center gap-2">
-              <Reply className="size-4 shrink-0" />
-              <p className="line-clamp-2 wrap-anywhere">
-                <span className="font-semibold">
-                  {(reply.isRepliedMessageMine
-                    ? MESSAGE_AUTHOR_ME
-                    : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
-                </span>
-                {reply.value}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onCancelReply()}
-              className="rounded-full hover:bg-muted/20 p-1 transition-colors"
-              aria-label="Cancel reply"
+      <div className="h-16 w-full shrink-0">
+        <AnimatePresence>
+          {reply !== null && (
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ x: 250, opacity: 0 }}
+              transition={{ type: 'spring', bounce: 0 }}
+              className="flex justify-between items-center w-full gap-5 bg-background-section/90 rounded-lg p-2 text-sm"
             >
-              <X className="stroke-danger" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div className="flex justify-center items-center gap-2">
+                <Reply className="size-4 shrink-0" />
+                <p className="line-clamp-2 wrap-anywhere">
+                  <span className="font-semibold">
+                    {(reply.isRepliedMessageMine
+                      ? MESSAGE_AUTHOR_ME
+                      : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
+                  </span>
+                  {reply.value}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onCancelReply()}
+                className="rounded-full hover:bg-muted/20 p-1 transition-colors"
+                aria-label="Cancel reply"
+              >
+                <X className="stroke-danger" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
       <div className="flex justify-between gap-5 w-full">
         <Textarea
           ref={textareaRef}

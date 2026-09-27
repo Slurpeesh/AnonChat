@@ -166,14 +166,11 @@ export default function Messages({ className }: IMessagesProps) {
   }
 
   return (
-    <>
+    <div className={cn('flex flex-col min-h-0', className)}>
       <ScrollArea
         ref={scrollRef}
-        onScroll={(e) => onScrollHandler(e)}
-        className={cn(
-          'w-full md:max-w-3xl max-h-[55dvh] rounded-md px-4',
-          className,
-        )}
+        onScroll={onScrollHandler}
+        className="w-full md:max-w-3xl min-h-0 rounded-md px-4"
       >
         <div className="flex flex-col gap-6">
           {messageGroups.map((group) => (
@@ -208,16 +205,18 @@ export default function Messages({ className }: IMessagesProps) {
           )}
         </AnimatePresence>
       </ScrollArea>
-      {isTyping && (
-        <div className="w-full md:max-w-3xl flex justify-center items-baseline-last gap-1 py-2 animate-pulse">
-          <span className="text-sm text-muted">Stranger typing</span>
-          <div className="flex gap-1">
-            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:0ms]" />
-            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:150ms]" />
-            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:300ms]" />
-          </div>
-        </div>
-      )}
-    </>
+      <div className="flex justify-center items-baseline-last shrink-0 gap-1 w-full md:max-w-3xl h-8 py-2 animate-pulse">
+        {isTyping && (
+          <>
+            <span className="text-sm text-muted">Stranger typing</span>
+            <div className="flex gap-1">
+              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:0ms]" />
+              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:150ms]" />
+              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:300ms]" />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   )
 }
