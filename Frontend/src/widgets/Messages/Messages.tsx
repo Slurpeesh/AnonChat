@@ -166,7 +166,7 @@ export default function Messages({ className }: IMessagesProps) {
   }
 
   return (
-    <div className={cn('flex flex-col min-h-0', className)}>
+    <div className={cn('flex flex-col items-center min-h-0', className)}>
       <ScrollArea
         ref={scrollRef}
         onScroll={onScrollHandler}

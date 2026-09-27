@@ -1,12 +1,22 @@
+import { cn } from '@/app/lib/utils'
 import ThemeButton from '@/features/ThemeButton/ThemeButton'
 import { ConnectionManager } from '@/widgets/ConnectionManager'
 import { ConnectionState } from '@/widgets/ConnectonState'
 import { motion } from 'motion/react'
 import AnonChatSvg from './svg/AnonChatSvg'
 
-export default function Header() {
+interface IHeaderProps {
+  className?: string
+}
+
+export default function Header({ className }: IHeaderProps) {
   return (
-    <header className="h-14 md:h-20 bg-accent-mild flex justify-between items-center px-5 py-3">
+    <header
+      className={cn(
+        'h-14 md:h-20 bg-accent-mild flex justify-between items-center px-5 py-3',
+        className,
+      )}
+    >
       <motion.a
         animate={{ x: [-300, 0], opacity: [0, 1] }}
         transition={{ duration: 1 }}
