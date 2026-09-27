@@ -18,7 +18,7 @@ import {
   ContextMenuTrigger,
 } from '@/shared/ContextMenu'
 import { IMessage } from '@/types'
-import { Copy, CopyCheck, Reply } from 'lucide-react'
+import { Check, CheckCheck, Copy, CopyCheck, Reply } from 'lucide-react'
 import { PanInfo } from 'motion/react'
 import { memo, useRef } from 'react'
 
@@ -177,7 +177,7 @@ const ChatMessage = memo(function ChatMessage({
               animate={isLastMessage ? appearAnimation : {}}
             >
               <BubbleContent
-                className="flex flex-col gap-1 transition-colors delay-300 whitespace-pre-wrap"
+                className="flex flex-col gap-1 min-w-20 transition-colors delay-300 whitespace-pre-wrap"
                 style={{
                   transitionDuration: `${message.isHighlighted ? MESSAGE_HIGHLIGHT_DURATION : MESSAGE_UNREAD_DURATION}ms`,
                 }}
@@ -204,6 +204,17 @@ const ChatMessage = memo(function ChatMessage({
                 )}
                 <span>{message.value}</span>
               </BubbleContent>
+              <div className="absolute -bottom-2 -right-2">
+                {message.isMine ? (
+                  message.isReadByOther ? (
+                    <CheckCheck className="size-4 stroke-muted" />
+                  ) : (
+                    <Check className="size-4 stroke-muted" />
+                  )
+                ) : (
+                  <></>
+                )}
+              </div>
             </Bubble>
           </ContextMenuTrigger>
         </MessageContent>

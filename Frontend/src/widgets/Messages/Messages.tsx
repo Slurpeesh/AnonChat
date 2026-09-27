@@ -1,10 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
 import { cn, MESSAGE_HIGHLIGHT_DURATION } from '@/app/lib/utils'
 import { selectLastMessage } from '@/app/store'
-import {
-  markAsRead,
-  setIsHighlighted,
-} from '@/app/store/slices/messageGroupsSlice'
+import { setIsHighlighted } from '@/app/store/slices/messageGroupsSlice'
 import aud from '@/assets/sounds/alert.mp3'
 import BackToBottomButton from '@/entities/BackToBottomButton/BackToBottomButton'
 import { MessageGroup } from '@/entities/Message'
@@ -14,10 +11,14 @@ import { UIEvent, useCallback, useEffect, useRef, useState } from 'react'
 import ChatMessage from './ChatMessage'
 
 interface IMessagesProps {
+  markAsReadByMe: (idsToMark: string[]) => void
   className?: string
 }
 
-export default function Messages({ className }: IMessagesProps) {
+export default function Messages({
+  className,
+  markAsReadByMe,
+}: IMessagesProps) {
   const messageGroups = useAppSelector((state) => state.messageGroups.value)
   const isTyping = useAppSelector((state) => state.isTyping.value)
   const lastMessage = useAppSelector(selectLastMessage)
@@ -103,7 +104,7 @@ export default function Messages({ className }: IMessagesProps) {
       for (const message of group.messages) {
         if (!message.isRead) idsToMark.push(message.id)
         if (message.id === lastVisibleId) {
-          dispatch(markAsRead(idsToMark))
+          markAsReadByMe(idsToMark)
           return
         }
       }
@@ -170,9 +171,9 @@ export default function Messages({ className }: IMessagesProps) {
       <ScrollArea
         ref={scrollRef}
         onScroll={onScrollHandler}
-        className="w-full md:max-w-3xl min-h-0 rounded-md px-4"
+        className="w-full md:max-w-3xl min-h-0 rounded-md"
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 px-6">
           {messageGroups.map((group) => (
             <MessageGroup key={group.id} className="gap-2">
               {group.messages.map((message, index) => {

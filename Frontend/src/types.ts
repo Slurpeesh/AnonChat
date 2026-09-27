@@ -5,6 +5,7 @@ export interface IMessage {
   value: string
   isMine: boolean
   isRead: boolean
+  isReadByOther: boolean
   isHighlighted: boolean
   isCopied: boolean
   reply: IReply

@@ -52,21 +52,22 @@ export const messageGroupsSlice = createSlice({
 
       message.isHighlighted = action.payload.state
     },
-    setIsRead: (state, action: PayloadAction<IStateController>) => {
-      const message = findMessageById(state.value, action.payload.id)
-
-      if (message === null) {
-        throw new Error(`Message with id ${action.payload.id} not found`)
-      }
-
-      message.isRead = action.payload.state
-    },
-    markAsRead: (state, action: PayloadAction<string[]>) => {
+    setAsRead: (state, action: PayloadAction<string[]>) => {
       const ids = new Set(action.payload)
       for (const group of state.value) {
         for (const message of group.messages) {
           if (ids.has(message.id)) {
             message.isRead = true
+          }
+        }
+      }
+    },
+    setAsReadByOther: (state, action: PayloadAction<string[]>) => {
+      const ids = new Set(action.payload)
+      for (const group of state.value) {
+        for (const message of group.messages) {
+          if (ids.has(message.id)) {
+            message.isReadByOther = true
           }
         }
       }
@@ -87,8 +88,8 @@ export const {
   addMessage,
   deleteAllMessages,
   setIsHighlighted,
-  setIsRead,
-  markAsRead,
+  setAsRead,
+  setAsReadByOther,
   setIsCopied,
 } = messageGroupsSlice.actions
 export default messageGroupsSlice.reducer

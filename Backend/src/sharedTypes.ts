@@ -15,11 +15,13 @@ export interface ServerToClientEvents {
     reply: IReply,
   ) => void
   otherTyping: (isTyping: boolean) => void
+  otherRead: (messageIds: string[]) => void
 }
 
 export interface ClientToServerEvents {
   createMessage: (msg: string, reply: IReply) => void
   typing: (isTyping: boolean) => void
+  messageRead: (messageIds: string[]) => void
 }
 
 export interface InterServerEvents {}

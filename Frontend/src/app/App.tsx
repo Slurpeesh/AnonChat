@@ -2,6 +2,8 @@ import { socket } from '@/app/socket'
 import {
   addMessage,
   deleteAllMessages,
+  setAsRead,
+  setAsReadByOther,
 } from '@/app/store/slices/messageGroupsSlice'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
@@ -11,7 +13,7 @@ import { ReplySchema } from '@/schemas'
 import { IReply } from '@/sharedTypes'
 import MessageForm from '@/widgets/Form/MessageForm'
 import Messages from '@/widgets/Messages/Messages'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { APP_TITLE } from './lib/utils'
 import { setIsConnected } from './store/slices/isConnectedSlice'
@@ -70,6 +72,7 @@ export default function App() {
           value,
           isMine: isMe,
           isRead: isMe,
+          isReadByOther: !isMe,
           isHighlighted: false,
           reply,
           isCopied: false,
@@ -86,6 +89,10 @@ export default function App() {
 
     function onOtherTyping(isTyping: boolean) {
       dispatch(setIsTyping(isTyping))
+    }
+
+    function onOtherRead(messageIds: string[]) {
+      dispatch(setAsReadByOther(messageIds))
     }
 
     function onTabVisibility() {
@@ -106,6 +113,7 @@ export default function App() {
     socket.on('readyStatus', onReadyStatus)
     socket.on('message', onMessage)
     socket.on('otherTyping', onOtherTyping)
+    socket.on('otherRead', onOtherRead)
 
     socket.connect()
 
@@ -118,6 +126,7 @@ export default function App() {
       socket.off('readyStatus', onReadyStatus)
       socket.off('message', onMessage)
       socket.off('otherTyping', onOtherTyping)
+      socket.off('otherRead', onOtherRead)
 
       if (titleChanger !== null) {
         clearInterval(titleChanger)
@@ -126,11 +135,19 @@ export default function App() {
     }
   }, [])
 
+  const markAsReadByMe = useCallback((idsToMark: string[]) => {
+    dispatch(setAsRead(idsToMark))
+    socket.emit('messageRead', idsToMark)
+  }, [])
+
   return (
     <div className="text-foreground h-dvh w-dvw flex flex-col overflow-hidden">
       <Header className="shrink-0" />
       <Main className="relative bg-background flex flex-col grow min-h-0 justify-between items-center p-5">
-        <Messages className="z-10 relative w-full min-h-0" />
+        <Messages
+          className="z-10 relative w-full min-h-0"
+          markAsReadByMe={markAsReadByMe}
+        />
         <MessageForm className="z-10 relative shrink-0" />
       </Main>
       <Footer />

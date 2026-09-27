@@ -111,6 +111,9 @@ io.on('connection', (socket) => {
       typingTimeouts.delete(socket.id)
     }
   })
+  socket.on('messageRead', (messageIds) => {
+    socket.to(socket.data.room).emit('otherRead', messageIds)
+  })
 })
 
 httpServer.listen(5122, () => {
