@@ -44,6 +44,57 @@ export default function Messages({
     }
   }, [])
 
+  const markVisibleMessagesRead = useCallback(() => {
+    if (document.hidden) return
+
+    const scrollArea = scrollRef.current
+    if (!scrollArea) return
+
+    const scrollAreaRect = scrollArea.getBoundingClientRect()
+    let lastVisibleId: string | null = null
+
+    for (const group of messageGroups) {
+      for (const message of group.messages) {
+        if (message.isRead) continue
+
+        const el = document.getElementById(`message-${message.id}`)
+        if (!el) continue
+
+        const rect = el.getBoundingClientRect()
+        const visibleTop = Math.max(rect.top, scrollAreaRect.top)
+        const visibleBottom = Math.min(rect.bottom, scrollAreaRect.bottom)
+        const visibleHeight = Math.max(0, visibleBottom - visibleTop)
+        if (visibleHeight / rect.height >= 0.5) {
+          lastVisibleId = message.id
+        }
+      }
+    }
+
+    if (lastVisibleId === null) return
+
+    const idsToMark: string[] = []
+    for (const group of messageGroups) {
+      for (const message of group.messages) {
+        if (!message.isRead) idsToMark.push(message.id)
+        if (message.id === lastVisibleId) {
+          markAsReadByMe(idsToMark)
+          return
+        }
+      }
+    }
+  }, [messageGroups])
+
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.hidden) return
+      markVisibleMessagesRead()
+    }
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [markVisibleMessagesRead])
+
   useEffect(() => {
     if (!lastMessage) return
     if (lastMessage.id === prevLastMessageIdRef.current) return
@@ -59,68 +110,17 @@ export default function Messages({
 
     if (!isLastMessageFromMe && (document.hidden || !isScrollAtBottom)) {
       const alertSound = alertSoundRef.current
-      if (alertSound === null) {
-        throw new Error('Alert sound is not initialized')
-      }
+      if (alertSound === null) throw new Error('Alert sound is not initialized')
       alertSound.pause()
       alertSound.currentTime = 0
       alertSound.play().catch((reason) => console.error(reason))
     }
-  }, [lastMessage])
 
-  const markVisibleMessagesRead = useCallback(() => {
-    if (document.hidden) return
-
-    const scrollArea = scrollRef.current
-    if (!scrollArea) return
-
-    const scrollAreaRect = scrollArea.getBoundingClientRect()
-    let lastVisibleId: string | null = null
-    let foundUnread = false
-
-    for (const group of messageGroups) {
-      for (const message of group.messages) {
-        if (message.isRead) continue
-        foundUnread = true
-
-        const el = document.getElementById(`message-${message.id}`)
-        if (!el) continue
-
-        const rect = el.getBoundingClientRect()
-        const visibleTop = Math.max(rect.top, scrollAreaRect.top)
-        const visibleBottom = Math.min(rect.bottom, scrollAreaRect.bottom)
-        const visibleHeight = Math.max(0, visibleBottom - visibleTop)
-        if (visibleHeight / rect.height >= 0.5) {
-          lastVisibleId = message.id
-        }
-      }
+    if (!isLastMessageFromMe) {
+      const raf = requestAnimationFrame(() => markVisibleMessagesRead())
+      return () => cancelAnimationFrame(raf)
     }
-
-    if (!foundUnread) return
-    if (!lastVisibleId) return
-
-    const idsToMark: string[] = []
-    for (const group of messageGroups) {
-      for (const message of group.messages) {
-        if (!message.isRead) idsToMark.push(message.id)
-        if (message.id === lastVisibleId) {
-          markAsReadByMe(idsToMark)
-          return
-        }
-      }
-    }
-  }, [messageGroups, dispatch])
-
-  useEffect(() => {
-    function onVisibilityChange() {
-      if (document.hidden) return
-      markVisibleMessagesRead()
-    }
-
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () =>
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [markVisibleMessagesRead])
+  }, [lastMessage, markVisibleMessagesRead])
 
   const onMessageReply = useCallback((repliedMessageId: string) => {
     const messageElement = document.getElementById(
@@ -167,11 +167,11 @@ export default function Messages({
   }
 
   return (
-    <div className={cn('flex flex-col items-center min-h-0', className)}>
+    <div className={cn('flex flex-col items-center grow min-h-0', className)}>
       <ScrollArea
         ref={scrollRef}
         onScroll={onScrollHandler}
-        className="w-full md:max-w-3xl min-h-0 rounded-md"
+        className="grow w-full md:max-w-3xl min-h-0 rounded-md"
       >
         <div className="flex flex-col gap-6 px-6">
           {messageGroups.map((group) => (

@@ -145,7 +145,7 @@ export default function App() {
       <Header className="shrink-0" />
       <Main className="relative bg-background flex flex-col grow min-h-0 justify-between items-center p-5">
         <Messages
-          className="z-10 relative w-full min-h-0"
+          className="z-10 relative w-full"
           markAsReadByMe={markAsReadByMe}
         />
         <MessageForm className="z-10 relative shrink-0" />
