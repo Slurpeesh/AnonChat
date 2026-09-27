@@ -205,15 +205,13 @@ export default function Messages({ className }: IMessagesProps) {
           )}
         </AnimatePresence>
       </ScrollArea>
-      <div className="flex justify-center items-baseline-last shrink-0 gap-1 w-full md:max-w-3xl h-8 py-2 animate-pulse">
+      <div className="flex justify-center items-baseline-last shrink-0 gap-1 w-full md:max-w-3xl h-8 py-2 text-foreground/90 animate-pulse">
         {isTyping && (
           <>
-            <span className="text-sm text-muted">Stranger typing</span>
-            <div className="flex gap-1">
-              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:0ms]" />
-              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:150ms]" />
-              <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:300ms]" />
-            </div>
+            <span className="text-sm">Stranger typing</span>
+            <span className="size-1 rounded-full bg-foreground/75 animate-bounce [animation-delay:0ms]" />
+            <span className="size-1 rounded-full bg-foreground/75 animate-bounce [animation-delay:150ms]" />
+            <span className="size-1 rounded-full bg-foreground/75 animate-bounce [animation-delay:300ms]" />
           </>
         )}
       </div>
