@@ -1,4 +1,5 @@
 import isConnectedReducer from '@/app/store/slices/isConnectedSlice'
+import isTypingReducer from '@/app/store/slices/isTypingSlice'
 import isWaitingReducer from '@/app/store/slices/isWaitingSlice'
 import messageGroupsReducer from '@/app/store/slices/messageGroupsSlice'
 import replyReducer from '@/app/store/slices/replySlice'
@@ -13,14 +14,12 @@ export const store = configureStore({
     isWaiting: isWaitingReducer,
     theme: themeReducer,
     reply: replyReducer,
+    isTyping: isTypingReducer,
   },
 })
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
-
-export const selectMessageGroups = (state: RootState) =>
-  state.messageGroups.value
 
 export const selectLastMessage = (state: RootState): IMessage | null => {
   const groups = state.messageGroups.value

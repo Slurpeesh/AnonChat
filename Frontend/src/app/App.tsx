@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from './hooks/useActions'
 import { APP_TITLE } from './lib/utils'
 import { setIsConnected } from './store/slices/isConnectedSlice'
+import { setIsTyping } from './store/slices/isTypingSlice'
 import { setIsWaiting } from './store/slices/isWaitingSlice'
 
 export default function App() {
@@ -83,6 +84,10 @@ export default function App() {
       }
     }
 
+    function onOtherTyping(isTyping: boolean) {
+      dispatch(setIsTyping(isTyping))
+    }
+
     function onTabVisibility() {
       if (!document.hidden) {
         if (titleChanger !== null) {
@@ -100,6 +105,7 @@ export default function App() {
     socket.on('waitingStatus', onWaitingStatus)
     socket.on('readyStatus', onReadyStatus)
     socket.on('message', onMessage)
+    socket.on('otherTyping', onOtherTyping)
 
     socket.connect()
 
@@ -111,6 +117,7 @@ export default function App() {
       socket.off('waitingStatus', onWaitingStatus)
       socket.off('readyStatus', onReadyStatus)
       socket.off('message', onMessage)
+      socket.off('otherTyping', onOtherTyping)
 
       if (titleChanger !== null) {
         clearInterval(titleChanger)

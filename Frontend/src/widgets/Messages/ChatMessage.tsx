@@ -149,7 +149,7 @@ const ChatMessage = memo(function ChatMessage({
                     onClick={() => onMessageReply(reply.repliedMessageId)}
                     className="flex flex-col text-accent border-l border-accent pl-2 text-sm w-full"
                   >
-                    <Reply className="w-4 h-4" />
+                    <Reply className="size-4" />
                     <div className="break-all text-left">
                       <span className="font-semibold">
                         {(reply.isRepliedMessageMine

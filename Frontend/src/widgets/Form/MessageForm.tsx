@@ -26,7 +26,6 @@ const SEND_BUTTON_VARIANTS: Variants = {
   },
   initial: { rotate: 0, scale: 1 },
 }
-const REPLY_MAX_LENGTH = 70
 
 interface IMessageForm {
   className?: string
@@ -40,6 +39,15 @@ export default function MessageForm({ className }: IMessageForm) {
   const [value, setValue] = useState('')
   const [isHovered, setIsHovered] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current !== null) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     textareaRef.current?.focus()
@@ -49,6 +57,7 @@ export default function MessageForm({ className }: IMessageForm) {
     const trimmedValue = value.trim()
     if (trimmedValue === '') return
 
+    stopTyping()
     dispatch(setReply(null))
     setValue('')
     socket.emit('createMessage', trimmedValue, reply)
@@ -68,6 +77,36 @@ export default function MessageForm({ className }: IMessageForm) {
 
   function onCancelReply() {
     dispatch(setReply(null))
+  }
+
+  function notifyTyping() {
+    socket.emit('typing', true)
+
+    if (typingTimeoutRef.current !== null) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('typing', false)
+    }, 2000)
+  }
+
+  function stopTyping() {
+    if (typingTimeoutRef.current !== null) {
+      clearTimeout(typingTimeoutRef.current)
+      typingTimeoutRef.current = null
+    }
+    socket.emit('typing', false)
+  }
+
+  function onValueChanged(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const curentValue = e.target.value
+    setValue(e.target.value)
+
+    if (curentValue.trim() === '') {
+      stopTyping()
+    } else {
+      notifyTyping()
+    }
   }
 
   function onMouseEnterSendButton() {
@@ -96,16 +135,14 @@ export default function MessageForm({ className }: IMessageForm) {
             className="flex justify-between items-center w-full gap-5 bg-background-section/90 rounded-lg p-2 text-sm"
           >
             <div className="flex justify-center items-center gap-2">
-              <Reply />
-              <p className="break-all">
+              <Reply className="size-4 shrink-0" />
+              <p className="line-clamp-2 wrap-anywhere">
                 <span className="font-semibold">
                   {(reply.isRepliedMessageMine
                     ? MESSAGE_AUTHOR_ME
                     : MESSAGE_AUTHOR_OTHER) + MESSAGE_AUTHOR_DIVIDER}
                 </span>
-                {reply.value.length > REPLY_MAX_LENGTH
-                  ? reply.value.slice(0, REPLY_MAX_LENGTH) + '…'
-                  : reply.value}
+                {reply.value}
               </p>
             </div>
 
@@ -124,7 +161,7 @@ export default function MessageForm({ className }: IMessageForm) {
         <Textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => onValueChanged(e)}
           onKeyDown={(e) => onKeyDown(e)}
           placeholder="Write a message"
           disabled={!isConnected || isWaiting}

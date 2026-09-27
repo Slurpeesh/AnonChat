@@ -14,10 +14,12 @@ export interface ServerToClientEvents {
     socketId: string,
     reply: IReply,
   ) => void
+  otherTyping: (isTyping: boolean) => void
 }
 
 export interface ClientToServerEvents {
   createMessage: (msg: string, reply: IReply) => void
+  typing: (isTyping: boolean) => void
 }
 
 export interface InterServerEvents {}

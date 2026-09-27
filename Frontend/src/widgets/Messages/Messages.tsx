@@ -19,6 +19,7 @@ interface IMessagesProps {
 
 export default function Messages({ className }: IMessagesProps) {
   const messageGroups = useAppSelector((state) => state.messageGroups.value)
+  const isTyping = useAppSelector((state) => state.isTyping.value)
   const lastMessage = useAppSelector(selectLastMessage)
   const dispatch = useAppDispatch()
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(true)
@@ -165,46 +166,58 @@ export default function Messages({ className }: IMessagesProps) {
   }
 
   return (
-    <ScrollArea
-      ref={scrollRef}
-      onScroll={(e) => onScrollHandler(e)}
-      className={cn(
-        'w-full md:max-w-3xl max-h-[55dvh] rounded-md px-4',
-        className,
-      )}
-    >
-      <div className="flex flex-col gap-6">
-        {messageGroups.map((group) => (
-          <MessageGroup key={group.id} className="gap-2">
-            {group.messages.map((message, index) => {
-              const isLastInGroup = index === group.messages.length - 1
-              const isLastOverall =
-                group.id === messageGroups[messageGroups.length - 1]?.id &&
-                isLastInGroup
-
-              return (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  isLastMessage={isLastOverall}
-                  isFirstInGroup={index === 0}
-                  onMessageReply={onMessageReply}
-                />
-              )
-            })}
-          </MessageGroup>
-        ))}
-      </div>
-      <AnimatePresence>
-        {!isScrollAtBottom && (
-          <BackToBottomButton
-            initial={{ x: 60 }}
-            animate={{ x: [60, 0] }}
-            exit={{ x: 60 }}
-            onClick={() => backToBottomHandler()}
-          />
+    <>
+      <ScrollArea
+        ref={scrollRef}
+        onScroll={(e) => onScrollHandler(e)}
+        className={cn(
+          'w-full md:max-w-3xl max-h-[55dvh] rounded-md px-4',
+          className,
         )}
-      </AnimatePresence>
-    </ScrollArea>
+      >
+        <div className="flex flex-col gap-6">
+          {messageGroups.map((group) => (
+            <MessageGroup key={group.id} className="gap-2">
+              {group.messages.map((message, index) => {
+                const isLastInGroup = index === group.messages.length - 1
+                const isLastOverall =
+                  group.id === messageGroups[messageGroups.length - 1]?.id &&
+                  isLastInGroup
+
+                return (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    isLastMessage={isLastOverall}
+                    isFirstInGroup={index === 0}
+                    onMessageReply={onMessageReply}
+                  />
+                )
+              })}
+            </MessageGroup>
+          ))}
+        </div>
+        <AnimatePresence>
+          {!isScrollAtBottom && (
+            <BackToBottomButton
+              initial={{ x: 60 }}
+              animate={{ x: [60, 0] }}
+              exit={{ x: 60 }}
+              onClick={() => backToBottomHandler()}
+            />
+          )}
+        </AnimatePresence>
+      </ScrollArea>
+      {isTyping && (
+        <div className="w-full md:max-w-3xl flex justify-center items-baseline-last gap-1 py-2 animate-pulse">
+          <span className="text-sm text-muted">Stranger typing</span>
+          <div className="flex gap-1">
+            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:0ms]" />
+            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:150ms]" />
+            <span className="size-1 rounded-full bg-muted/80 animate-bounce [animation-delay:300ms]" />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
