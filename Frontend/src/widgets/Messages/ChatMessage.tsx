@@ -28,6 +28,10 @@ const DRAG_CONSTRAINTS_OTHER = { left: 0, right: 150 }
 const APPEAR_ANIMATION_MINE = { x: [50, 0] }
 const APPEAR_ANIMATION_OTHER = { x: [-50, 0] }
 
+const REPLY_CLICK_THRESHOLD_PX = 10
+const MESSAGE_DRAG_THRESHOLD_PX = 140
+const REPLY_LONG_PRESS_THRESHOLD_MS = 500
+
 interface IChatMessageProps {
   message: IMessage
   isLastMessage: boolean
@@ -50,6 +54,11 @@ const ChatMessage = memo(function ChatMessage({
 
   const dispatch = useAppDispatch()
   const copyTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const replyPointerStartRef = useRef<{
+    x: number
+    y: number
+    time: number
+  } | null>(null)
 
   function onCopySelect(e: Event) {
     e.preventDefault()
@@ -79,10 +88,39 @@ const ChatMessage = memo(function ChatMessage({
     )
   }
 
+  function onReplyPointerDown(e: React.PointerEvent) {
+    replyPointerStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      time: Date.now(),
+    }
+  }
+
+  function onReplyPointerCancel() {
+    replyPointerStartRef.current = null
+  }
+
+  function onReplyPointerUp(e: React.PointerEvent, id: string) {
+    if (e.button !== 0) return
+
+    const start = replyPointerStartRef.current
+    replyPointerStartRef.current = null
+    if (!start) return
+
+    const dx = Math.abs(e.clientX - start.x)
+    const dy = Math.abs(e.clientY - start.y)
+    if (dx > REPLY_CLICK_THRESHOLD_PX || dy > REPLY_CLICK_THRESHOLD_PX) return
+
+    const duration = Date.now() - start.time
+    if (duration > REPLY_LONG_PRESS_THRESHOLD_MS) return
+
+    onMessageReply(id)
+  }
+
   function onDragEndHandler(info: PanInfo) {
     const shouldActivateReply = message.isMine
-      ? info.offset.x < -200
-      : info.offset.x > 200
+      ? info.offset.x < -MESSAGE_DRAG_THRESHOLD_PX
+      : info.offset.x > MESSAGE_DRAG_THRESHOLD_PX
 
     if (shouldActivateReply) {
       dispatch(
@@ -146,7 +184,11 @@ const ChatMessage = memo(function ChatMessage({
               >
                 {reply !== null && (
                   <button
-                    onClick={() => onMessageReply(reply.repliedMessageId)}
+                    onPointerDown={onReplyPointerDown}
+                    onPointerUp={(e) =>
+                      onReplyPointerUp(e, reply.repliedMessageId)
+                    }
+                    onPointerCancel={onReplyPointerCancel}
                     className="flex flex-col text-accent border-l border-accent pl-2 text-sm w-full"
                   >
                     <Reply className="size-4" />
