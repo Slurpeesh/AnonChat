@@ -1,9 +1,15 @@
+import { useAppDispatch, useAppSelector } from '@/app/hooks/useActions'
+import { APP_TITLE, INVALID_EMOJI_ID } from '@/app/lib/utils'
 import { socket } from '@/app/socket'
+import { setIsConnected } from '@/app/store/slices/isConnectedSlice'
+import { setIsTyping } from '@/app/store/slices/isTypingSlice'
+import { setIsWaiting } from '@/app/store/slices/isWaitingSlice'
 import {
   addMessage,
   deleteAllMessages,
   setAsRead,
   setAsReadByOther,
+  setMessageEmoji,
 } from '@/app/store/slices/messageGroupsSlice'
 import Loader from '@/features/Loader/Loader'
 import Footer from '@/pages/Footer/Footer'
@@ -14,11 +20,6 @@ import { IReply } from '@/sharedTypes'
 import MessageForm from '@/widgets/Form/MessageForm'
 import Messages from '@/widgets/Messages/Messages'
 import { useCallback, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from './hooks/useActions'
-import { APP_TITLE } from './lib/utils'
-import { setIsConnected } from './store/slices/isConnectedSlice'
-import { setIsTyping } from './store/slices/isTypingSlice'
-import { setIsWaiting } from './store/slices/isWaitingSlice'
 
 export default function App() {
   const isConnected = useAppSelector((state) => state.isConnected.value)
@@ -76,6 +77,7 @@ export default function App() {
           isHighlighted: false,
           reply,
           isCopied: false,
+          emojiId: INVALID_EMOJI_ID,
         }),
       )
 
@@ -93,6 +95,10 @@ export default function App() {
 
     function onOtherRead(messageIds: string[]) {
       dispatch(setAsReadByOther(messageIds))
+    }
+
+    function onEmojiApplied(messageId: string, emojiId: string) {
+      dispatch(setMessageEmoji({ messageId, emojiId }))
     }
 
     function onTabVisibility() {
@@ -114,6 +120,7 @@ export default function App() {
     socket.on('message', onMessage)
     socket.on('otherTyping', onOtherTyping)
     socket.on('otherRead', onOtherRead)
+    socket.on('emojiApplied', onEmojiApplied)
 
     socket.connect()
 
@@ -127,6 +134,7 @@ export default function App() {
       socket.off('message', onMessage)
       socket.off('otherTyping', onOtherTyping)
       socket.off('otherRead', onOtherRead)
+      socket.off('emojiApplied', onEmojiApplied)
 
       if (titleChanger !== null) {
         clearInterval(titleChanger)

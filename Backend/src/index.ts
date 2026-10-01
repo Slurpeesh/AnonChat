@@ -114,6 +114,9 @@ io.on('connection', (socket) => {
   socket.on('messageRead', (messageIds) => {
     socket.to(socket.data.room).emit('otherRead', messageIds)
   })
+  socket.on('applyEmoji', (messageId, emojiId) => {
+    io.to(socket.data.room).emit('emojiApplied', messageId, emojiId)
+  })
 })
 
 httpServer.listen(5122, () => {

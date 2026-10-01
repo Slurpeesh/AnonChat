@@ -1,16 +1,20 @@
 import { useAppDispatch } from '@/app/hooks/useActions'
 import {
   cn,
+  INVALID_EMOJI_ID,
   MESSAGE_AUTHOR_DIVIDER,
   MESSAGE_AUTHOR_ME,
   MESSAGE_AUTHOR_OTHER,
   MESSAGE_HIGHLIGHT_DURATION,
   MESSAGE_UNREAD_DURATION,
 } from '@/app/lib/utils'
+import { socket } from '@/app/socket'
 import { setIsCopied } from '@/app/store/slices/messageGroupsSlice'
 import { setReply } from '@/app/store/slices/replySlice'
 import { Message, MessageContent, MessageHeader } from '@/entities/Message'
-import { Bubble, BubbleContent } from '@/features/Bubble'
+import { Bubble, BubbleContent, BubbleReactions } from '@/features/Bubble'
+import { EMOJI_MAP } from '@/features/Emoji/emojiMap'
+import EmojiPicker from '@/features/Emoji/EmojiPicker'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -20,7 +24,7 @@ import {
 import { IMessage } from '@/types'
 import { Check, CheckCheck, Copy, CopyCheck, Reply } from 'lucide-react'
 import { PanInfo } from 'motion/react'
-import { memo, useRef } from 'react'
+import { memo, useCallback, useRef } from 'react'
 
 const DRAG_CONSTRAINTS_MINE = { left: -150, right: 0 }
 const DRAG_CONSTRAINTS_OTHER = { left: 0, right: 150 }
@@ -51,6 +55,7 @@ const ChatMessage = memo(function ChatMessage({
     : APPEAR_ANIMATION_OTHER
   const bubbleVariant =
     message.isHighlighted || !message.isRead ? 'alert' : 'secondary'
+  const AppliedEmoji = EMOJI_MAP[message.emojiId]
 
   const dispatch = useAppDispatch()
   const copyTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -59,6 +64,8 @@ const ChatMessage = memo(function ChatMessage({
     y: number
     time: number
   } | null>(null)
+  const messageRef = useRef(message)
+  messageRef.current = message
 
   function onCopySelect(e: Event) {
     e.preventDefault()
@@ -146,6 +153,15 @@ const ChatMessage = memo(function ChatMessage({
     }
   }
 
+  const onEmojiClicked = useCallback((emojiId: string) => {
+    const message = messageRef.current
+    socket.emit(
+      'applyEmoji',
+      message.id,
+      message.emojiId === emojiId ? INVALID_EMOJI_ID : emojiId,
+    )
+  }, [])
+
   return (
     <Message
       align={message.isMine ? 'end' : 'start'}
@@ -179,7 +195,11 @@ const ChatMessage = memo(function ChatMessage({
               <BubbleContent
                 className="flex flex-col gap-1 min-w-20 transition-colors delay-300 whitespace-pre-wrap"
                 style={{
-                  transitionDuration: `${message.isHighlighted ? MESSAGE_HIGHLIGHT_DURATION : MESSAGE_UNREAD_DURATION}ms`,
+                  transitionDuration: `${
+                    message.isHighlighted
+                      ? MESSAGE_HIGHLIGHT_DURATION
+                      : MESSAGE_UNREAD_DURATION
+                  }ms`,
                 }}
               >
                 {reply !== null && (
@@ -204,6 +224,15 @@ const ChatMessage = memo(function ChatMessage({
                 )}
                 <span>{message.value}</span>
               </BubbleContent>
+              {(!message.isMine || AppliedEmoji !== undefined) && (
+                <BubbleReactions align="start">
+                  <EmojiPicker
+                    selectedEmojiId={message.emojiId}
+                    onSelect={onEmojiClicked}
+                    disabled={message.isMine}
+                  />
+                </BubbleReactions>
+              )}
               <div className="absolute -bottom-2 -right-2">
                 {message.isMine ? (
                   message.isReadByOther ? (

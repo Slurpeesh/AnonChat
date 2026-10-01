@@ -16,12 +16,14 @@ export interface ServerToClientEvents {
   ) => void
   otherTyping: (isTyping: boolean) => void
   otherRead: (messageIds: string[]) => void
+  emojiApplied: (messageId: string, emojiId: string) => void
 }
 
 export interface ClientToServerEvents {
   createMessage: (msg: string, reply: IReply) => void
   typing: (isTyping: boolean) => void
   messageRead: (messageIds: string[]) => void
+  applyEmoji: (messageId: string, emojiId: string) => void
 }
 
 export interface InterServerEvents {}

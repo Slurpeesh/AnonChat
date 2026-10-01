@@ -9,6 +9,8 @@ export const MESSAGE_AUTHOR_ME = 'Me'
 export const MESSAGE_AUTHOR_OTHER = 'Stranger'
 export const MESSAGE_AUTHOR_DIVIDER = ':\u00A0'
 
+export const INVALID_EMOJI_ID = ''
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

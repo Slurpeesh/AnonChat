@@ -173,9 +173,9 @@ export default function Messages({
         onScroll={onScrollHandler}
         className="grow w-full md:max-w-3xl min-h-0 rounded-md"
       >
-        <div className="flex flex-col gap-6 px-6">
+        <div className="flex flex-col gap-8 px-6">
           {messageGroups.map((group) => (
-            <MessageGroup key={group.id} className="gap-2">
+            <MessageGroup key={group.id} className="gap-4">
               {group.messages.map((message, index) => {
                 const isLastInGroup = index === group.messages.length - 1
                 const isLastOverall =

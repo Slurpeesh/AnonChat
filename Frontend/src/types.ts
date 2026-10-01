@@ -9,6 +9,7 @@ export interface IMessage {
   isHighlighted: boolean
   isCopied: boolean
   reply: IReply
+  emojiId: string
 }
 
 export interface IMessageGroup {

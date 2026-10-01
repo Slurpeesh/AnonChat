@@ -81,6 +81,18 @@ export const messageGroupsSlice = createSlice({
 
       message.isCopied = action.payload.state
     },
+    setMessageEmoji: (
+      state,
+      action: PayloadAction<{ messageId: string; emojiId: string }>,
+    ) => {
+      const message = findMessageById(state.value, action.payload.messageId)
+
+      if (message === null) {
+        throw new Error(`Message with id ${action.payload.messageId} not found`)
+      }
+
+      message.emojiId = action.payload.emojiId
+    },
   },
 })
 
@@ -91,5 +103,6 @@ export const {
   setAsRead,
   setAsReadByOther,
   setIsCopied,
+  setMessageEmoji,
 } = messageGroupsSlice.actions
 export default messageGroupsSlice.reducer
