@@ -181,6 +181,7 @@ const ChatMessage = memo(function ChatMessage({
           <ContextMenuTrigger asChild>
             <Bubble
               id={`message-${message.id}`}
+              data-message-id={message.id}
               variant={bubbleVariant}
               drag="x"
               dragSnapToOrigin

@@ -35,25 +35,78 @@ export default function Messages({
     alertSoundRef.current = new Audio(aud)
   }
 
-  useEffect(() => {
-    return () => {
-      Object.values(highlightedTimeoutsRef.current).forEach((timeout) => {
-        clearTimeout(timeout)
-      })
-      highlightedTimeoutsRef.current = {}
+  // these refs are used to avoid stale closures in the callbacks below and to avoid unnecessary re-renders when the state changes
+  const messageGroupsRef = useRef(messageGroups)
+  messageGroupsRef.current = messageGroups
+  const markAsReadByMeRef = useRef(markAsReadByMe)
+  markAsReadByMeRef.current = markAsReadByMe
+
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const observedIdsRef = useRef<Set<string>>(new Set())
+  const visibleIdsRef = useRef<Set<string>>(new Set())
+  const lastMarkedIdRef = useRef<string | null>(null)
+
+  const markAsReadUpTo = useCallback((lastVisibleId: string) => {
+    if (document.hidden) return
+    if (lastVisibleId === lastMarkedIdRef.current) return
+
+    const groups = messageGroupsRef.current
+    const idsToMark: string[] = []
+    let isLastVisibleIdFound = false
+
+    for (const group of groups) {
+      for (const message of group.messages) {
+        if (!message.isRead) idsToMark.push(message.id)
+        if (message.id === lastVisibleId) {
+          isLastVisibleIdFound = true
+          break
+        }
+      }
+      if (isLastVisibleIdFound) break
     }
+
+    if (!isLastVisibleIdFound) return
+    lastMarkedIdRef.current = lastVisibleId
+    if (idsToMark.length > 0) markAsReadByMeRef.current(idsToMark)
   }, [])
 
-  const markVisibleMessagesRead = useCallback(() => {
-    if (document.hidden) return
+  const markLastVisibleFromSet = useCallback(() => {
+    const visible = visibleIdsRef.current
+    if (visible.size === 0) return
 
+    const groups = messageGroupsRef.current
+    for (let g = groups.length - 1; g >= 0; g--) {
+      const group = groups[g]
+      if (!group) continue
+
+      const messages = group.messages
+
+      for (let m = messages.length - 1; m >= 0; m--) {
+        const message = messages[m]
+        if (!message) continue
+
+        const id = message.id
+        if (visible.has(id)) {
+          markAsReadUpTo(id)
+          return
+        }
+      }
+    }
+  }, [markAsReadUpTo])
+
+  /**
+   * this is needed only for visibilitychange: observer does not work on a hidden tab.
+   * we go only through unread messages.
+   */
+  const recalcVisibleIds = useCallback(() => {
     const scrollArea = scrollRef.current
     if (!scrollArea) return
 
     const scrollAreaRect = scrollArea.getBoundingClientRect()
-    let lastVisibleId: string | null = null
+    const groups = messageGroupsRef.current
+    const next = new Set<string>()
 
-    for (const group of messageGroups) {
+    for (const group of groups) {
       for (const message of group.messages) {
         if (message.isRead) continue
 
@@ -64,36 +117,92 @@ export default function Messages({
         const visibleTop = Math.max(rect.top, scrollAreaRect.top)
         const visibleBottom = Math.min(rect.bottom, scrollAreaRect.bottom)
         const visibleHeight = Math.max(0, visibleBottom - visibleTop)
+
         if (visibleHeight / rect.height >= 0.5) {
-          lastVisibleId = message.id
+          next.add(message.id)
         }
       }
     }
 
-    if (lastVisibleId === null) return
+    visibleIdsRef.current = next
+    markLastVisibleFromSet()
+  }, [markLastVisibleFromSet])
 
-    const idsToMark: string[] = []
-    for (const group of messageGroups) {
-      for (const message of group.messages) {
-        if (!message.isRead) idsToMark.push(message.id)
-        if (message.id === lastVisibleId) {
-          markAsReadByMe(idsToMark)
-          return
+  useEffect(() => {
+    const root = scrollRef.current
+    if (!root) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.messageId
+          if (!id) continue
+
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            visibleIdsRef.current.add(id)
+          } else {
+            visibleIdsRef.current.delete(id)
+          }
         }
+        markLastVisibleFromSet()
+      },
+      { root, threshold: [0, 0.5] },
+    )
+
+    observerRef.current = observer
+
+    return () => {
+      observer.disconnect()
+      observerRef.current = null
+      observedIdsRef.current.clear()
+      visibleIdsRef.current.clear()
+    }
+  }, [markLastVisibleFromSet])
+
+  // subscribe/unsubscribe to messages elements
+  useEffect(() => {
+    const observer = observerRef.current
+    const root = scrollRef.current
+    if (!observer || !root) return
+
+    const currentNodeIds = new Set<string>()
+    const nodes = root.querySelectorAll<HTMLElement>('[data-message-id]')
+
+    nodes.forEach((node) => {
+      const id = node.dataset.messageId
+      if (!id) return
+      currentNodeIds.add(id)
+      if (!observedIdsRef.current.has(id)) {
+        observer.observe(node)
+        observedIdsRef.current.add(id)
       }
+    })
+
+    // unsubscribe from nodes that are no longer visible
+    for (const id of observedIdsRef.current) {
+      if (currentNodeIds.has(id)) continue
+      const node = root.querySelector<HTMLElement>(`[data-message-id="${id}"]`)
+      if (node) observer.unobserve(node)
+      observedIdsRef.current.delete(id)
+      visibleIdsRef.current.delete(id)
     }
   }, [messageGroups])
 
   useEffect(() => {
+    if (messageGroups.length === 0) {
+      lastMarkedIdRef.current = null
+    }
+  }, [messageGroups.length])
+
+  useEffect(() => {
     function onVisibilityChange() {
       if (document.hidden) return
-      markVisibleMessagesRead()
+      recalcVisibleIds()
     }
-
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () =>
       document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [markVisibleMessagesRead])
+  }, [recalcVisibleIds])
 
   useEffect(() => {
     if (!lastMessage) return
@@ -101,47 +210,42 @@ export default function Messages({
     prevLastMessageIdRef.current = lastMessage.id
 
     const isLastMessageFromMe = lastMessage.isMine
-    const isScrollAtBottom = isScrollAtBottomRef.current
+    const isAtBottom = isScrollAtBottomRef.current
 
-    if (isLastMessageFromMe || isScrollAtBottom) {
+    if (isLastMessageFromMe || isAtBottom) {
       const scroll = scrollRef.current
       if (scroll) scroll.scrollTop = scroll.scrollHeight
     }
 
-    if (!isLastMessageFromMe && (document.hidden || !isScrollAtBottom)) {
+    if (!isLastMessageFromMe && (document.hidden || !isAtBottom)) {
       const alertSound = alertSoundRef.current
       if (alertSound === null) throw new Error('Alert sound is not initialized')
       alertSound.pause()
       alertSound.currentTime = 0
       alertSound.play().catch((reason) => console.error(reason))
     }
+  }, [lastMessage])
 
-    if (!isLastMessageFromMe) {
-      const raf = requestAnimationFrame(() => markVisibleMessagesRead())
-      return () => cancelAnimationFrame(raf)
-    }
-  }, [lastMessage, markVisibleMessagesRead])
+  const onMessageReply = useCallback(
+    (repliedMessageId: string) => {
+      const messageElement = document.getElementById(
+        `message-${repliedMessageId}`,
+      )
+      if (messageElement === null) return
 
-  const onMessageReply = useCallback((repliedMessageId: string) => {
-    const messageElement = document.getElementById(
-      `message-${repliedMessageId}`,
-    )
-    if (messageElement === null) return
+      const existingTimeout = highlightedTimeoutsRef.current[repliedMessageId]
+      if (existingTimeout !== undefined) clearTimeout(existingTimeout)
 
-    const existingTimeout = highlightedTimeoutsRef.current[repliedMessageId]
-    if (existingTimeout !== undefined) {
-      clearTimeout(existingTimeout)
-    }
+      dispatch(setIsHighlighted({ id: repliedMessageId, state: true }))
+      messageElement.scrollIntoView({ behavior: 'smooth' })
 
-    dispatch(setIsHighlighted({ id: repliedMessageId, state: true }))
-
-    messageElement.scrollIntoView({ behavior: 'smooth' })
-
-    highlightedTimeoutsRef.current[repliedMessageId] = setTimeout(() => {
-      dispatch(setIsHighlighted({ id: repliedMessageId, state: false }))
-      delete highlightedTimeoutsRef.current[repliedMessageId]
-    }, MESSAGE_HIGHLIGHT_DURATION)
-  }, [])
+      highlightedTimeoutsRef.current[repliedMessageId] = setTimeout(() => {
+        dispatch(setIsHighlighted({ id: repliedMessageId, state: false }))
+        delete highlightedTimeoutsRef.current[repliedMessageId]
+      }, MESSAGE_HIGHLIGHT_DURATION)
+    },
+    [dispatch],
+  )
 
   function onScrollHandler(e: UIEvent<HTMLDivElement>) {
     const isAtBottom =
@@ -152,19 +256,24 @@ export default function Messages({
       ) < 100
 
     isScrollAtBottomRef.current = isAtBottom
-    if (isAtBottom !== isScrollAtBottom) {
-      setIsScrollAtBottom(isAtBottom)
-    }
-
-    markVisibleMessagesRead()
+    if (isAtBottom !== isScrollAtBottom) setIsScrollAtBottom(isAtBottom)
   }
 
   function backToBottomHandler() {
     const scroll = scrollRef.current
     if (!scroll) return
-
     scroll.scrollTop = scroll.scrollHeight
   }
+
+  // Cleanup подсветок
+  useEffect(() => {
+    return () => {
+      Object.values(highlightedTimeoutsRef.current).forEach((timeout) => {
+        clearTimeout(timeout)
+      })
+      highlightedTimeoutsRef.current = {}
+    }
+  }, [])
 
   return (
     <div className={cn('flex flex-col items-center grow min-h-0', className)}>
