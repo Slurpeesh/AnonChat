@@ -5,6 +5,8 @@ import { cn } from '@/app/lib/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/Popover'
 import { ScrollArea } from '@/shared/ScrollArea'
 
+import { useRecentEmojis } from '@/app/hooks/useRecentEmojis'
+import { motion } from 'motion/react'
 import EmojiSelectButton from './EmojiSelectButton'
 import { EMOJI_IDS, EMOJI_MAP } from './emojiMap'
 
@@ -20,10 +22,12 @@ const EmojiPicker = memo(function EmojiPicker({
   disabled = false,
 }: IEmojiPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { recent, addRecent } = useRecentEmojis()
   const SelectedEmoji = EMOJI_MAP[selectedEmojiId]
 
   const handleSelect = useCallback(
     (emojiId: string) => {
+      addRecent(emojiId)
       setIsOpen(false)
       onSelect(emojiId)
     },
@@ -43,11 +47,33 @@ const EmojiPicker = memo(function EmojiPicker({
         {SelectedEmoji === undefined ? (
           <FaceSlightlySmilingPlus className="size-full" />
         ) : (
-          <SelectedEmoji className="size-full" />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', bounce: 0.3 }}
+          >
+            <SelectedEmoji className="size-full" />
+          </motion.div>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-auto">
-        <ScrollArea className="h-64 w-full">
+      <PopoverContent className="h-64 w-auto">
+        {recent.length > 0 && (
+          <>
+            <p className="pr-2 text-sm text-muted">Recent</p>
+            <div className="grid grid-cols-6 pr-2">
+              {recent.map((emojiId) => (
+                <EmojiSelectButton
+                  key={emojiId}
+                  emojiId={emojiId}
+                  isSelected={selectedEmojiId === emojiId}
+                  onSelect={handleSelect}
+                />
+              ))}
+            </div>
+            <div className="mx-2 my-1 border-t border-muted/30" />
+          </>
+        )}
+        <ScrollArea className="size-full">
           <div className="grid grid-cols-6 pr-2">
             {EMOJI_IDS.map((emojiId) => (
               <EmojiSelectButton
