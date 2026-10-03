@@ -5,7 +5,7 @@ import { cn } from '@/app/lib/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/Popover'
 import { ScrollArea } from '@/shared/ScrollArea'
 
-import { useRecentEmojis } from '@/app/hooks/useRecentEmojis'
+import { useRecentEmojis } from '@/features/Emoji/hooks/useRecentEmojis'
 import { motion } from 'motion/react'
 import EmojiSelectButton from './EmojiSelectButton'
 import { EMOJI_IDS, EMOJI_MAP } from './emojiMap'

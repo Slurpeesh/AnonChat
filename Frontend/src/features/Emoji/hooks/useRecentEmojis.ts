@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { EMOJI_MAP } from '@/features/Emoji/emojiMap'
+import { useCallback, useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'emoji-recent'
 const MAX_RECENT = 6
@@ -10,7 +11,12 @@ function readFromStorage(): string[] {
   const parsed = JSON.parse(raw)
   if (!Array.isArray(parsed)) return []
 
-  return parsed
+  const filteredEmojis = parsed.filter((id) => id in EMOJI_MAP)
+  if (filteredEmojis.length !== parsed.length) {
+    writeToStorage(filteredEmojis)
+  }
+
+  return filteredEmojis
 }
 
 function writeToStorage(ids: string[]) {
@@ -20,15 +26,14 @@ function writeToStorage(ids: string[]) {
 export function useRecentEmojis() {
   const [recent, setRecent] = useState<string[]>(() => readFromStorage())
 
+  useEffect(() => {
+    writeToStorage(recent)
+  }, [recent])
+
   const addRecent = useCallback((emojiId: string) => {
-    setRecent((prev) => {
-      const next = [emojiId, ...prev.filter((id) => id !== emojiId)].slice(
-        0,
-        MAX_RECENT,
-      )
-      writeToStorage(next)
-      return next
-    })
+    setRecent((prev) =>
+      [emojiId, ...prev.filter((id) => id !== emojiId)].slice(0, MAX_RECENT),
+    )
   }, [])
 
   return { recent, addRecent }
