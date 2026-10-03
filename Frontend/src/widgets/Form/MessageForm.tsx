@@ -40,12 +40,22 @@ export default function MessageForm({ className }: IMessageForm) {
   const [isHovered, setIsHovered] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isTypingRef = useRef(false)
 
   useEffect(() => {
+    function onDisconnect() {
+      isTypingRef.current = false
+    }
+    socket.on('disconnect', onDisconnect)
+
     return () => {
       if (typingTimeoutRef.current !== null) {
         clearTimeout(typingTimeoutRef.current)
       }
+      if (isTypingRef.current) {
+        socket.emit('typing', false)
+      }
+      socket.off('disconnect', onDisconnect)
     }
   }, [])
 
@@ -80,13 +90,20 @@ export default function MessageForm({ className }: IMessageForm) {
   }
 
   function notifyTyping() {
-    socket.emit('typing', true)
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      socket.emit('typing', true)
+    }
 
     if (typingTimeoutRef.current !== null) {
       clearTimeout(typingTimeoutRef.current)
     }
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('typing', false)
+      typingTimeoutRef.current = null
+      if (isTypingRef.current) {
+        isTypingRef.current = false
+        socket.emit('typing', false)
+      }
     }, 2000)
   }
 
@@ -95,7 +112,10 @@ export default function MessageForm({ className }: IMessageForm) {
       clearTimeout(typingTimeoutRef.current)
       typingTimeoutRef.current = null
     }
-    socket.emit('typing', false)
+    if (isTypingRef.current) {
+      isTypingRef.current = false
+      socket.emit('typing', false)
+    }
   }
 
   function onValueChanged(e: React.ChangeEvent<HTMLTextAreaElement>) {

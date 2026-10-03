@@ -31,8 +31,6 @@ const io = new Server<
   },
 })
 
-const typingTimeouts = new Map<string, NodeJS.Timeout>()
-
 let waitingId: string | null = null
 let waitingSocket: Socket | null = null
 
@@ -70,9 +68,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
-    const existing = typingTimeouts.get(socket.id)
-    if (existing) clearTimeout(existing)
-    typingTimeouts.delete(socket.id)
     socket.to(socket.data.room).emit('otherTyping', false)
 
     const roomId = socket.data.room
@@ -96,20 +91,7 @@ io.on('connection', (socket) => {
     io.to(socket.data.room).emit('message', randomUUID(), msg, socket.id, reply)
   })
   socket.on('typing', (isTyping) => {
-    const existing = typingTimeouts.get(socket.id)
-    if (existing) clearTimeout(existing)
-
     socket.to(socket.data.room).emit('otherTyping', isTyping)
-
-    if (isTyping) {
-      const timeout = setTimeout(() => {
-        socket.to(socket.data.room).emit('otherTyping', false)
-        typingTimeouts.delete(socket.id)
-      }, 3000)
-      typingTimeouts.set(socket.id, timeout)
-    } else {
-      typingTimeouts.delete(socket.id)
-    }
   })
   socket.on('messageRead', (messageIds) => {
     socket.to(socket.data.room).emit('otherRead', messageIds)
